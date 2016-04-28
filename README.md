@@ -1,7 +1,8 @@
-# Trakt import/export
+# Trakt import/export tools
 
 ## Purpose
 Import CSV file format Movies or TVShows IDs into Trakt.tv.
+
 Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
 
 ## Usage
@@ -84,7 +85,16 @@ Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into hi
 
         $ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s
 
-## Sample import CSV format
+## Sample export usage
+
+Export all movies from wathclist:
+
+	$ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
+
+Export all tvshows from the history list:
+
+	$ ./export_trakt.py -c config.ini -t shows -o export_tvshows_history.csv -l history
+
 
 #### Movies to add watchlist
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' by line
