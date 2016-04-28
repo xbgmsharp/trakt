@@ -1,16 +1,17 @@
-# Import_csv_trakt
+# Trakt import/export
 
 ## Purpose
-Import CSV file format Movies or TVShows IDs into Trakt.
+Import CSV file format Movies or TVShows IDs into Trakt.tv.
+Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
 
 ## Usage
 
+#### Import
 ```text
-usage: import_csv_trakt.py [-h] [-v] [-c CONFIG] [-i [INPUT]]
-                          [-f {imdb,tmdb,tvdb,tvrage}]
-                          [-t {movies,shows,episodes}]
-                          [-l {watchlist,collection,history}] [-s] [-C] [-d]
-                          [-V]
+usage: import_trakt.py [-h] [-v] [-c CONFIG] [-i [INPUT]]
+                       [-f {imdb,tmdb,tvdb,tvrage}]
+                       [-t {movies,shows,episodes}]
+                       [-l {watchlist,collection,history}] [-s [SEEN]] [-V]
 
 This program import Movies or TVShows IDs into Trakt.
 
@@ -30,35 +31,62 @@ optional arguments:
                         allow to overwrite type, default movies
   -l {watchlist,collection,history}, --list {watchlist,collection,history}
                         allow to overwrite default list, default watchlist
-  -s, --seen            mark as seen, default False
-  -C, --clean           empty list prior to import, default True
-  -d, --dryrun          do not update the account, default True
+  -s [SEEN], --seen [SEEN]
+                        mark as seen, default False. Use specific time if
+                        provided, falback time: "2016-01-01T00:00:00.000Z"
   -V, --verbose         print additional verbose information, default True
 
-Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'. Import them into a list in track, mark as seen if need.
+Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'. Import them into a
+list in track, mark as seen if need.
 ```
 
-## Sample usage
+#### Export
+```text
+usage: export_trackt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
+                        [-t {movies,shows,episodes}]
+                        [-l {watchlist,collection,history}] [-V]
+
+This program export Movies or TVShows IDs from Trakt list.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         show program's version number and exit
+  -c CONFIG, --config CONFIG
+                        allow to overwrite default config filename, default
+                        config.ini
+  -o [OUTPUT], --output [OUTPUT]
+                        allow to overwrite default output filename, default
+                        None
+  -t {movies,shows,episodes}, --type {movies,shows,episodes}
+                        allow to overwrite type, default movies
+  -l {watchlist,collection,history}, --list {watchlist,collection,history}
+                        allow to overwrite default list, default history
+  -V, --verbose         print additional verbose information, default True
+
+Read a list from Trakt API. Export them into a CSV file.
+```
+
+## Sample import usage
 
 Import all movies with imdb id from file ``movies_favorites.csv`` into watchlist:
 
-        $ ./import_csv_trakt.py -c config.ini -f imdb -t movies -i movies_favorites.csv -l watchlist
+        $ ./import_trakt.py -c config.ini -f imdb -t movies -i movies_favorites.csv -l watchlist
 
 Import all tvshows with imdb id from file ``tvshows_favorites.csv`` into watchlist:
 
-        $ ./import_csv_trakt.py -c config.ini -f imdb -i  tvshows_favorites.csv -l watchlist -t shows
+        $ ./import_trakt.py -c config.ini -f imdb -i  tvshows_favorites.csv -l watchlist -t shows
 
-Import all movies with imdb id from file ``movies_views.csv`` into history and mark as seen
+Import all movies with imdb id from file ``movies_views.csv`` into history and mark as seen:
 
-        $ ./import_csv_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -s
+        $ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -s
 
-Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen
+Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen:
 
-        $ ./import_csv_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s
+        $ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s
 
-## Sample CSV format
+## Sample import CSV format
 
-### Movies to add watchlist
+#### Movies to add watchlist
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' by line
 ```
 tt22239XX
@@ -66,14 +94,14 @@ tt11712XX
 tt12728XX
 ```
 
-### TVShows to add to watchlist
+#### TVShows to add to watchlist
 one 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' by line
 ```
 tt04606XX
 tt12365XX
 ```
 
-### Episodes as views to history
+#### Episodes as views to history
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage with season and episode
 ```
 tt04606XX,3,4
@@ -81,7 +109,7 @@ tt04606XX,3,4
 
 ## Export data from Kodi
 
-### Favourites - To put in watchlist
+#### Favourites - To put in watchlist
 
 Export your favourites movies ``movies_favourites.csv``
 
@@ -105,7 +133,7 @@ tt04606XX
 sqlite>
 ```
 
-### Meta - Views - To put in history list
+#### Meta - Views - To put in history list
 
 Export your views movies into ``movies_views.csv``
 
@@ -126,7 +154,8 @@ XX
 sqlite> SELECT count(imdb_id) FROM tvshow_meta WHERE overlay=7;
 XX
 ```
-### Requirements
+
+## Requirements
 
 #### On Ubuntu/Debian Linux system
 
