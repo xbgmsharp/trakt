@@ -1,9 +1,10 @@
 # Trakt.tv import/export tools
 
 ## Purpose
-Import CSV file format Movies or TVShows IDs into Trakt.tv.
 
-Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
+ * Import Movies or TVShows IDs from CSV file format into Trakt.tv.
+
+ * Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
 
 ## Usage
 On the first run, it will create a config file ``config.ini``, if it does not exist, 
@@ -15,9 +16,10 @@ make sure you edit it and specify the ``client_id`` and ``client_secret`` as wel
 
         $ vim config.ini
 
-Create an application to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications
+Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications
 
-Then we need to authenticate against Trakt.tv API using the PIN and it will generate your a ``oauth_token``.
+Then you need to authenticate against Trakt.tv API using the PIN and it will generate you an ``oauth_token``. 
+Run the script to guide you thought this process to generate your ``oauth_token``.
 
 ## Configuration
 
@@ -49,7 +51,8 @@ proxy_port = 3128
 
         $ pydoc `pwd`/export_trakt.py
 
-#### Import
+## Usage 
+#### Import usage
 ```text
 usage: import_trakt.py [-h] [-v] [-c CONFIG] [-i [INPUT]]
                        [-f {imdb,tmdb,tvdb,tvrage}]
@@ -83,7 +86,7 @@ Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'. Import them into a
 list in track, mark as seen if need.
 ```
 
-#### Export
+#### Export usage
 ```text
 usage: export_trackt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
                         [-t {movies,shows,episodes}]
@@ -109,7 +112,8 @@ optional arguments:
 Read a list from Trakt API. Export them into a CSV file.
 ```
 
-## Sample import usage
+## Examples
+#### Sample import usage
 
 Import all movies with imdb id from file ``movies_favorites.csv`` into watchlist:
 
@@ -148,19 +152,19 @@ One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage with season and episode
 tt04606XX,3,4
 ```
 
-## Sample export usage
+#### Sample export usage
 
 Export all movies from wathclist:
 
-	$ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
+  $ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
 
 Export all tvshows from the history list:
 
-	$ ./export_trakt.py -c config.ini -t shows -o export_shows_history.csv -l history
+  $ ./export_trakt.py -c config.ini -t shows -o export_shows_history.csv -l history
 
 Export all episodes from the history list:
 
-	$ ./export_trakt.py -c config.ini -t episodes -o export_episodes_history.csv -l history
+  $ ./export_trakt.py -c config.ini -t episodes -o export_episodes_history.csv -l history
 
 ## Export data from Kodi
 
