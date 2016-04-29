@@ -1,4 +1,4 @@
-# Trakt import/export tools
+# Trakt.tv import/export tools
 
 ## Purpose
 Import CSV file format Movies or TVShows IDs into Trakt.tv.
@@ -6,6 +6,48 @@ Import CSV file format Movies or TVShows IDs into Trakt.tv.
 Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
 
 ## Usage
+On the first run, it will create a config file ``config.ini``, if it does not exist, 
+make sure you edit it and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: AN, proxy, etc...
+
+        $ python import_trakt.py -h
+
+        $ python import_trakt.py
+
+        $ vim config.ini
+
+Create an application to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications
+
+Then we need to authenticate against Trakt.tv API using the PIN and it will generate your a ``oauth_token``.
+
+## Configuration
+
+#### Configuration sample
+```text
+[SETTINGS]
+client_id = xxxxxxxxxxxxxxxxxxxxxxxxx
+client_secret = xxxxxxxxxxxxxxxxxxxxxx
+oauth_token = xxxxxxxxxxxxxxxxxxxxxxx
+baseurl = https://api-v2launch.trakt.tv
+proxy = False
+proxy_host = https://127.0.0.1
+proxy_port = 3128
+```
+
+#### Configuration details
+
+ * ``client_id``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
+ * ``client_secret``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
+ * ``oauth_token``: Uniq ID to identify yourself against your application
+ * ``baseurl``: API base URL, depends on the platfrom, eg: Production (https://api-v2launch.trakt.tv) or Staging (https://api-staging.trakt.tv)
+ * ``proxy``: True/False setting to enable proxy support
+ * ``proxy_host``: Full URI of the proxy
+ * ``proxy_port``: Port of the proxy to connect to
+
+## Developer documentation
+
+        $ pydoc `pwd`/import_trakt.py
+
+        $ pydoc `pwd`/export_trakt.py
 
 #### Import
 ```text
@@ -81,20 +123,9 @@ Import all movies with imdb id from file ``movies_views.csv`` into history and m
 
         $ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -s
 
-Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen:
+Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen on 1 January 2014
 
-        $ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s
-
-## Sample export usage
-
-Export all movies from wathclist:
-
-	$ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
-
-Export all tvshows from the history list:
-
-	$ ./export_trakt.py -c config.ini -t shows -o export_tvshows_history.csv -l history
-
+        $ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s 2014-01-01T00:00:00.000Z
 
 #### Movies to add watchlist
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' by line
@@ -116,6 +147,20 @@ One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage with season and episode
 ```
 tt04606XX,3,4
 ```
+
+## Sample export usage
+
+Export all movies from wathclist:
+
+	$ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
+
+Export all tvshows from the history list:
+
+	$ ./export_trakt.py -c config.ini -t shows -o export_shows_history.csv -l history
+
+Export all episodes from the history list:
+
+	$ ./export_trakt.py -c config.ini -t episodes -o export_episodes_history.csv -l history
 
 ## Export data from Kodi
 
