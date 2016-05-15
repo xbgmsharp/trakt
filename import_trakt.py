@@ -4,7 +4,7 @@
 # (c) Copyright 2016 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
-# Import Movies or TVShows IDs into Trakt
+# Import Movies or TVShows IDs into Trakt.tv
 #
 # Requirement on Ubuntu/Debian Linux system
 # apt-get install python-dateutil python-simplejson python-requests python-openssl jq
@@ -36,7 +36,7 @@ pp = pprint.PrettyPrinter(indent=4)
 desc="""This program import Movies or TVShows IDs into Trakt.tv."""
 
 epilog="""Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'.
-Import them into a list in track, mark as seen if need."""
+Import them into a list in Trakt.tv, mark as seen if need."""
 
 _trakt = {
         'client_id'     :       '', # Auth details for trakt API
@@ -246,13 +246,6 @@ def cleanup_list(options):
             print "No item return for {type} from the {list} list".format(
                 type=options.type, list=options.list)
 
-def pytrakt_list_cleanup(options):
-        """Pytrakt API"""
-        trakt.core.BASE_URL = _trakt['baseurl']
-        trakt.core.CLIENT_ID = _trakt['client_id']
-        trakt.core.OAUTH_TOKEN = _trakt['oauth_token']
-        trakt.core.CLIENT_SECRET = _trakt['client_secret']
-
 def main():
         """
         Main program loop
@@ -372,7 +365,7 @@ def main():
                         results['not_found'] += len(result['not_found'][options.type])
         else:
             # TODO Read STDIN to ID
-            print "No items found, nothing to do"
+            print "No items found, nothing to do."
             sys.exit(0)
 
         print "Overall imported {sent} {type}, results added:{added}, existing:{existing}, not_found:{not_found}".format(

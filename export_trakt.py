@@ -4,7 +4,7 @@
 # (c) Copyright 2016 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
-# Import Movies or TVShows IDs into Trakt
+# Export Movies or TVShows IDs from Trakt.tv
 #
 # Requirement on Ubuntu/Debian Linux system
 # apt-get install python-dateutil python-simplejson python-requests python-openssl jq
@@ -172,7 +172,7 @@ def api_auth(options):
         print 'Save as "oauth_token" in file {0}: {1}'.format(options.config, response["access_token"])
 
 def api_get_list(options, page):
-        """API call for Sync / Get Watchlist / Get watchlist"""
+        """API call for Sync / Get list by type"""
         url = _trakt['baseurl'] + '/sync/{list}/{type}?page={page}&limit={limit}'.format(
                             list=options.list, type=options.type, page=page, limit=1000)
         if options.verbose:
