@@ -83,12 +83,12 @@ optional arguments:
   -V, --verbose         print additional verbose information, default True
 
 Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'. Import them into a
-list in track, mark as seen if need.
+list in Trakt.tv, mark as seen if need.
 ```
 
 #### Export usage
 ```text
-usage: export_trackt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
+usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
                         [-t {movies,shows,episodes}]
                         [-l {watchlist,collection,history}] [-V]
 
@@ -156,69 +156,26 @@ tt04606XX,3,4
 
 Export all movies from wathclist:
 
-  $ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
+        $ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
 
 Export all tvshows from the history list:
 
-  $ ./export_trakt.py -c config.ini -t shows -o export_shows_history.csv -l history
+        $ ./export_trakt.py -c config.ini -t shows -o export_shows_history.csv -l history
 
 Export all episodes from the history list:
 
-  $ ./export_trakt.py -c config.ini -t episodes -o export_episodes_history.csv -l history
+        $ ./export_trakt.py -c config.ini -t episodes -o export_episodes_history.csv -l history
 
 ## Export data from Kodi
 
-#### Favourites - To put in watchlist
-
-Export your favourites movies ``movies_favourites.csv``
-
-        $ sqlite3 plugin.video.genesis/favourites.db "select id from movies;" -csv > movies_favourites.csv
-
-Export your favourites tvshows ``tvshows_favourites.csv``
-
-        $ sqlite3 plugin.video.genesis/favourites.db "select id from tvshows;" -csv > tvshows_favourites.csv
-
-From the sqlite promt
-```sql
-sqlite> .schema
-CREATE TABLE tvshows (id TEXT, items TEXT, UNIQUE(id));
-CREATE TABLE movies (id TEXT, items TEXT, UNIQUE(id));
-sqlite> select id from movies;
-tt15027XX
-...
-sqlite> select id from tvshows;
-tt04606XX
-...
-sqlite>
-```
-
-#### Meta - Views - To put in history list
-
-Export your views movies into ``movies_views.csv``
-
-        $ sqlite3 script.module.metahandler/meta_cache/video_cache.db "SELECT imdb_id FROM movie_meta WHERE overlay=7;" -csv > movies_views.csv
-
-Export your views episodes ``episodes_views.csv``
-
-        $ sqlite3 script.module.metahandler/meta_cache/video_cache.db "SELECT imdb_id,season,episode FROM episode_meta WHERE overlay=7;" -csv > episodes_views.csv
-
-From the sqlite promt
-```sql
-sqlite> SELECT count(imdb_id) FROM movie_meta WHERE overlay=7;
-XX
-sqlite> SELECT count(imdb_id) FROM episode_meta WHERE overlay=7;
-XXX
-sqlite> SELECT count(imdb_id) FROM season_meta WHERE overlay=7;
-XX
-sqlite> SELECT count(imdb_id) FROM tvshow_meta WHERE overlay=7;
-XX
-```
+Export Movies or TVShows IDs from Kodi into CSV file format.
+[Export data from Kodi](https://github.com/xbgmsharp/trakt/blob/master/KODI.md)
 
 ## Requirements
 
 #### On Ubuntu/Debian Linux system
 
-        apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+        $ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
 
 #### On Windows on Python 2.7
 
@@ -230,7 +187,7 @@ XX
 
 ## Support
 
-To get support, please create new [issue](https://github.com/xbgmsharp/import_csv_trakt/issues)
+To get support, please create new [issue](https://github.com/xbgmsharp/trakt/issues)
 
 ## Licence
 
