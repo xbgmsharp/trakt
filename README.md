@@ -171,6 +171,11 @@ Export all episodes from the history list:
 Export Movies or TVShows IDs from Kodi into CSV file format.
 [Export data from Kodi](https://github.com/xbgmsharp/trakt/blob/master/KODI.md)
 
+## Export data from CouchPotato
+
+Export Movies IDs from CouchPotato into CSV file format.
+[Export data from CouchPotato](https://github.com/xbgmsharp/trakt/blob/master/CouchPotato.md)
+
 ## Requirements
 
 #### On Ubuntu/Debian Linux system
