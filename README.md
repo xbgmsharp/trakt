@@ -6,20 +6,55 @@
 
  * Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
 
+## Requirements
+
+You must use Python 2.7.x.
+
+##### On Ubuntu/Debian Linux system
+
+Ensure you are running Python 2.7
+```
+        $ python -V
+Python 2.7.9
+```
+
+Install need module dependencies
+
+        $ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+
+##### On Windows system
+
+ Download the installer: https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi
+
+ Ensure you are running Python 2.7
+```
+        C:\Python27>python.exe -V
+Python 2.7.11
+```
+
+ Install need module dependencies
+
+        C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
+
 ## Usage
-On the first run, it will create a config file ``config.ini``, if it does not exist, 
-make sure you edit it and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: AN, proxy, etc...
 
-        $ python import_trakt.py -h
+* Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications
+You only need to fill up the ``Name`` and the ``Description``, leave the rest empty and click on ``SAVE APP``.
 
-        $ python import_trakt.py
+* Run the script to create a default config file ``config.ini``
+
+* Edit the config file ``config.ini`` and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: URL, proxy, etc...
+
+* Run the script to authenticate against Trakt.tv API using the PIN method and it will generate you an ``oauth_token``.
+You will be prompted to open a link into a browser and paste the pincode back to the script. 
+Make sure you save you ``oauth_token`` into the config file ``config.ini`` for later use.
+
+
+        $ python export_trakt.py
 
         $ vim config.ini
 
-Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications
-
-Then you need to authenticate against Trakt.tv API using the PIN and it will generate you an ``oauth_token``. 
-Run the script to guide you thought this process to generate your ``oauth_token``.
+        $ python export_trakt.py
 
 ## Configuration
 
@@ -178,20 +213,6 @@ Export Movies or TVShows IDs from Kodi into CSV file format.
 
 Export Movies IDs from CouchPotato into CSV file format.
 [Export data from CouchPotato](https://github.com/xbgmsharp/trakt/blob/master/CouchPotato.md)
-
-## Requirements
-
-#### On Ubuntu/Debian Linux system
-
-        $ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
-
-#### On Windows on Python 2.7
-
- Download the installer: https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi
-
- Install need module dependecies
-
-        C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
 
 ## Support
 
