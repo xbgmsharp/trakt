@@ -86,17 +86,17 @@ def read_config(options):
                 try:
                         config = ConfigParser.SafeConfigParser()
                         config.read(_configfile)
-                        if config.has_option('SETTINGS','CLIENT_ID'):
+                        if config.has_option('SETTINGS','CLIENT_ID') and len(config.get('SETTINGS','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('SETTINGS','CLIENT_ID')
                         else:
                                 print 'Error, you must specify a CLIENT_ID'
                                 sys.exit(1)
-                        if config.has_option('SETTINGS','CLIENT_SECRET'):
+                        if config.has_option('SETTINGS','CLIENT_SECRET') and len(config.get('SETTINGS','CLIENT_SECRET')) != 0:
                                 _trakt['client_secret'] = config.get('SETTINGS','CLIENT_SECRET')
                         else:
                                 print 'Error, you must specify a CLIENT_SECRET'
                                 sys.exit(1)
-                        if config.has_option('SETTINGS','OAUTH_TOKEN'):
+                        if config.has_option('SETTINGS','OAUTH_TOKEN') and len(config.get('SETTINGS','OAUTH_TOKEN')) != 0:
                                 _trakt['oauth_token'] = config.get('SETTINGS','OAUTH_TOKEN')
                         else:
                                 print 'Warning, authentification is required'
