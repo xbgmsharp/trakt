@@ -197,12 +197,37 @@ def api_get_list(options, page):
 
         return response_arr
 
+def api_remove_from_list(options, remove_data, is_id=False):
+        """API call for Sync / Remove from list"""
+        url = _trakt['baseurl'] + '/sync/{list}/remove'.format(list=options.list)
+        if options.type == 'episodes':
+            values = { 'shows' : remove_data }
+        elif not is_id:
+            values = { options.type : remove_data }
+        else:
+            values = { 'ids' : remove_data }
+        json_data = json.dumps(values)
+        if options.verbose:
+            print(url)
+            pp.pprint(json_data)
+        if _proxy['proxy']:
+            r = requests.post(url, data=json_data, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
+        else:
+            r = requests.post(url, data=json_data, headers=_headers, timeout=(5, 60))
+        if r.status_code != 200:
+            print "Error removing items from {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text)
+            return None
+        else:
+            return json.loads(r.text)
+
 def main():
         """
         Main program loop
         * Read configuration file and validate
         * Authenticate if require
         * Export data from Trakt.tv
+        * Cleanup list from Trakt.tv
         * Write to CSV
         """
         # Parse inputs if any
@@ -219,9 +244,12 @@ def main():
         parser.add_argument('-l', '--list',
                       help='allow to overwrite default list, default %(default)s',
                       choices=['watchlist', 'collection', 'history'], dest='list', default='history')
-        #parser.add_argument('-C', '--clean',
-        #              help='empty list prior to import, default %(default)s',
-        #              default=True, action='store_true', dest='clean')
+        parser.add_argument('-C', '--clean',
+                      help='empty list after export, default %(default)s',
+                      default=False, action='store_true', dest='clean')
+        parser.add_argument('-D', '--duplicate',
+                      help='Remove duplicate from list after export, default %(default)s',
+                      default=False, action='store_true', dest='dup')
         #parser.add_argument('-d', '--dryrun',
         #              help='do not update the account, default %(default)s',
         #              default=True, action='store_true', dest='dryrun')
@@ -256,6 +284,7 @@ def main():
             print "trakt: {}".format(_trakt)
             print "Authorization header: {}".format(_headers['Authorization'])
 
+        # Get data from Trakt
         export_data = api_get_list(options, 1)
         if export_data:
             print "Found {0} Item-Count".format(len(export_data))
@@ -271,33 +300,90 @@ def main():
         elif options.list == 'collection':
             options.time = 'collected_at'
 
-        results = []
+        export_csv = []
         find_dupids = []
         for data in export_data:
             #pp.pprint(data)
             if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
-                results.append({    'imdb' : data[options.type[:-1]]['ids']['imdb'],
+                export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
-                                    options.time : data[options.time]})
+                                    options.time : data[options.time],
+                                    'list_id' : data['id']})
             elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
-                results.append({    'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
+                export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'season' : data[options.type[:-1]]['season'],
                                     'episode' : data[options.type[:-1]]['number']})
+        #print export_csv
+        # Write export data into CSV file
+        write_csv(options, export_csv)
 
-        #print results
+        # Empty list after export
+        if options.clean:
+            cleanup_results = {'sentids' : 0, 'deleted' : 0, 'not_found' : 0}
+            to_remove = []
+            for data in export_data:
+                # TODO add filter
+                #if data[options.time] == "2012-01-01T00:00:00.000Z":
+                to_remove.append({'ids': data[options.type[:-1]]['ids']})
+                if len(to_remove) >= 10:
+                    cleanup_results['sentids'] += len(to_remove)
+                    result = api_remove_from_list(options, to_remove)
+                    if result:
+                        print "Result: {0}".format(result)
+                        if 'deleted' in result and result['deleted']:
+                            cleanup_results['deleted'] += result['deleted'][options.type]
+                        if 'not_found' in result and result['not_found']:
+                            cleanup_results['not_found'] += len(result['not_found'][options.type])
+                    to_remove = []
+            # Remove the rest
+            if len(to_remove) > 0:
+                #print pp.pprint(data)
+                cleanup_results['sentids'] += len(to_remove)
+                result = api_remove_from_list(options, to_remove)
+                if result:
+                    print "Result: {0}".format(result)
+                    if 'deleted' in result and result['deleted']:
+                        cleanup_results['deleted'] += result['deleted'][options.type]
+                    if 'not_found' in result and result['not_found']:
+                        cleanup_results['not_found'] += len(result['not_found'][options.type])
+            print "Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
+                sent=cleanup_results['sentids'], type=options.type, 
+                deleted=cleanup_results['deleted'], not_found=cleanup_results['not_found'])
 
+        # Found duplicate and remove duplicate
         dup_ids = [item for item, count in collections.Counter(find_dupids).items() if count > 1]
         print "Found {dups} duplicate out of {total} {entry}".format(
                     entry=options.type, dups=len(dup_ids), total=len(find_dupids))
-        if len(dup_ids) > 0:
-            print dup_ids
-
-        write_csv(options, results)
-
+        if options.dup:
+            if len(dup_ids) > 0:
+                print dup_ids
+            dup_results = {'sentids' : 0, 'deleted' : 0, 'not_found' : 0}
+            to_remove = []
+            for dupid in find_dupids:
+                count = 0
+                for data in export_data:
+                    if data[options.type[:-1]]['ids']['imdb'] == dupid:
+                        #print "{0} {1}".format(dupid, data['id'])
+                        count += 1
+                        if count > 1:
+                            print "Removing {0} {1}".format(dupid, data['id'])
+                            to_remove.append(data['id'])
+                            dup_results['sentids'] += len(to_remove)
+                            result = api_remove_from_list(options, to_remove, is_id=True)
+                            if result:
+                                print "Result: {0}".format(result)
+                                if 'deleted' in result and result['deleted']:
+                                    dup_results['deleted'] += result['deleted'][options.type]
+                                if 'not_found' in result and result['not_found']:
+                                    dup_results['not_found'] += len(result['not_found'][options.type])
+                                to_remove = []
+            print "Overall {dup} duplicate {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
+                dup=len(dup_ids), sent=dup_results['sentids'], type=options.type, 
+                deleted=dup_results['deleted'], not_found=dup_results['not_found'])
 
 if __name__ == '__main__':
         main()
