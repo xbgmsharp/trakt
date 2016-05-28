@@ -54,12 +54,13 @@ proxy_port = 3128
 ## Usage 
 #### Import usage
 ```text
-usage: import_trakt.py [-h] [-v] [-c CONFIG] [-i [INPUT]]
+usage: import_trakt.py [-h] [-v] [-c CONFIG] -i [INPUT]
                        [-f {imdb,tmdb,tvdb,tvrage}]
                        [-t {movies,shows,episodes}]
-                       [-l {watchlist,collection,history}] [-s [SEEN]] [-V]
+                       [-l {watchlist,collection,history}] [-s [SEEN]] [-C]
+                       [-V]
 
-This program import Movies or TVShows IDs into Trakt.
+This program import Movies or TVShows IDs into Trakt.tv.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -68,8 +69,7 @@ optional arguments:
                         allow to overwrite default config filename, default
                         config.ini
   -i [INPUT], --input [INPUT]
-                        allow to overwrite default input filename, default
-                        None
+                        CSV file to import, default None
   -f {imdb,tmdb,tvdb,tvrage}, --format {imdb,tmdb,tvdb,tvrage}
                         allow to overwrite default ID type format, default
                         imdb
@@ -80,6 +80,7 @@ optional arguments:
   -s [SEEN], --seen [SEEN]
                         mark as seen, default False. Use specific time if
                         provided, falback time: "2016-01-01T00:00:00.000Z"
+  -C, --clean           empty list prior to import, default False
   -V, --verbose         print additional verbose information, default True
 
 Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'. Import them into a
@@ -89,10 +90,10 @@ list in Trakt.tv, mark as seen if need.
 #### Export usage
 ```text
 usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
-                        [-t {movies,shows,episodes}]
-                        [-l {watchlist,collection,history}] [-V]
+                       [-t {movies,shows,episodes}]
+                       [-l {watchlist,collection,history}] [-C] [-D] [-V]
 
-This program export Movies or TVShows IDs from Trakt list.
+This program export Movies or TVShows IDs from Trakt.tv list.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -107,6 +108,8 @@ optional arguments:
                         allow to overwrite type, default movies
   -l {watchlist,collection,history}, --list {watchlist,collection,history}
                         allow to overwrite default list, default history
+  -C, --clean           empty list after export, default False
+  -D, --duplicate       Remove duplicate from list after export, default False
   -V, --verbose         print additional verbose information, default True
 
 Read a list from Trakt API. Export them into a CSV file.
