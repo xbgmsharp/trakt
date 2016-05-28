@@ -173,21 +173,31 @@ def api_search_by_id(options, id):
         else:
             return json.loads(r.text)
 
-def api_get_list(options):
+def api_get_list(options, page):
         """API call for Sync / Get list by type"""
-        url = _trakt['baseurl'] + '/sync/{list}/{type}'.format(list=options.list, type=options.type)
+        url = _trakt['baseurl'] + '/sync/{list}/{type}?page={page}&limit={limit}'.format(
+                            list=options.list, type=options.type, page=page, limit=1000)
         if options.verbose:
             print(url)
         if _proxy['proxy']:
             r = requests.get(url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
         else:
             r = requests.get(url, headers=_headers, timeout=(5, 60))
+        #pp.pprint(r.headers)
         if r.status_code != 200:
-            print "Error fetching items from {list}: {status} [{text}]".format(
+            print "Error fetching Get {list}: {status} [{text}]".format(
                     list=options.list, status=r.status_code, text=r.text)
             return None
         else:
-            return json.loads(r.text)
+            global response_arr
+            response_arr += json.loads(r.text)
+        if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
+            print "Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            if page != int(r.headers['X-Pagination-Page-Count']):
+                api_get_list(options, page+1)
+
+        return response_arr
 
 def api_add_to_list(options, import_data):
         """API call for Sync / Add items to list"""
@@ -195,9 +205,9 @@ def api_add_to_list(options, import_data):
         #values = '{ "movies": [ { "ids": { "imdb": "tt0000111" } }, { "ids": { , "imdb": "tt1502712" } } ] }'
         #values = '{ "movies": [ { "watched_at": "2014-01-01T00:00:00.000Z", "ids": { "imdb": "tt0000111" } }, { "watched_at": "2013-01-01T00:00:00.000Z", "ids": { "imdb": "tt1502712" } } ] }'
         if options.type == 'episodes':
-            values = {  'shows' : import_data }
+            values = { 'shows' : import_data }
         else:
-            values = {  options.type : import_data }
+            values = { options.type : import_data }
         json_data = json.dumps(values)
         if options.verbose:
             print "Sending to URL: {0}".format(url)
@@ -213,18 +223,23 @@ def api_add_to_list(options, import_data):
         else:
             return json.loads(r.text)
 
-def api_remove_from_list(options):
-        """API call for Sync / Remove items from list"""
-        url = _trakt['baseurl'] + '/sync/{list}/{type}/remove'.format(
-                        list=options.list, type=options.type)
+def api_remove_from_list(options, remove_data):
+        """API call for Sync / Remove from list"""
+        url = _trakt['baseurl'] + '/sync/{list}/remove'.format(list=options.list)
+        if options.type == 'episodes':
+            values = { 'shows' : remove_data }
+        else:
+            values = { options.type : remove_data }
+        json_data = json.dumps(values)
         if options.verbose:
             print(url)
+            pp.pprint(json_data)
         if _proxy['proxy']:
-            r = requests.post(url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
+            r = requests.post(url, data=json_data, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
         else:
-            r = requests.post(url, headers=_headers, timeout=(5, 60))
+            r = requests.post(url, data=json_data, headers=_headers, timeout=(5, 60))
         if r.status_code != 200:
-            print "Error removing  items from {list}: {status} [{text}]".format(
+            print "Error removing items from {list}: {status} [{text}]".format(
                     list=options.list, status=r.status_code, text=r.text)
             return None
         else:
@@ -232,19 +247,40 @@ def api_remove_from_list(options):
 
 def cleanup_list(options):
         """Empty list prior to import"""
-        item_list = api_get_list(options)
-        pp.pprint(item_list)
-        if not item_list:
-            print "Found {0} Item-Count".format(len(item_list))
-            for item in item_list:
-                if options.type[:-1] != "episode" and item[options.type[:-1]]['ids']:
-                    print "Deleting from {list} {type} {traktid} '{title}'". format(
-                        list=options.list, type=options.type, traktid=item[options.type[:-1]]['ids']['trakt'],
-                        title=data[options.type[:-1]]['title'])
-                    api_remove_from_list(options, item[options.type[:-1]]['ids']['trakt'])
+        export_data = api_get_list(options, 1)
+        if export_data:
+            print "Found {0} Item-Count".format(len(export_data))
         else:
-            print "No item return for {type} from the {list} list".format(
+            print "Error, Cleanup no item return for {type} from the {list} list".format(
                 type=options.type, list=options.list)
+            sys.exit(1)
+        results = {'sentids' : 0, 'deleted' : 0, 'not_found' : 0}
+        to_remove = []
+        for data in export_data:
+            to_remove.append({'ids': data[options.type[:-1]]['ids']})
+            if len(to_remove) >= 10:
+                results['sentids'] += len(to_remove)
+                result = api_remove_from_list(options, to_remove)
+                if result:
+                    print "Result: {0}".format(result)
+                    if 'deleted' in result and result['deleted']:
+                        results['deleted'] += result['deleted'][options.type]
+                    if 'not_found' in result and result['not_found']:
+                        results['not_found'] += len(result['not_found'][options.type])
+                to_remove = []
+        # Remove the rest
+        if len(to_remove) > 0:
+            #print pp.pprint(data)
+            results['sentids'] += len(to_remove)
+            result = api_remove_from_list(options, to_remove)
+            if result:
+                print "Result: {0}".format(result)
+                if 'deleted' in result and result['deleted']:
+                    results['deleted'] += result['deleted'][options.type]
+                if 'not_found' in result and result['not_found']:
+                    results['not_found'] += len(result['not_found'][options.type])
+        print "Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
+            sent=results['sentids'], type=options.type, deleted=results['deleted'], not_found=results['not_found'])
 
 def main():
         """
@@ -252,6 +288,7 @@ def main():
         * Read configuration file and validate
         * Read CSV file
         * Authenticate if require
+        * Cleanup list from Trakt.tv
         * Inject data into Trakt.tv
         """
         # Parse inputs if any
@@ -275,9 +312,9 @@ def main():
                       help='mark as seen, default %(default)s. Use specific time if provided, falback time: "2016-01-01T00:00:00.000Z"',
                       nargs='?', const='2016-01-01T00:00:00.000Z',
                       action='store', type=str, dest='seen', default=False)
-        #parser.add_argument('-C', '--clean',
-        #              help='empty list prior to import, default %(default)s',
-        #              default=True, action='store_true', dest='clean')
+        parser.add_argument('-C', '--clean',
+                      help='empty list prior to import, default %(default)s',
+                      default=False, action='store_true', dest='clean')
         #parser.add_argument('-d', '--dryrun',
         #              help='do not update the account, default %(default)s',
         #              default=True, action='store_true', dest='dryrun')
@@ -303,7 +340,7 @@ def main():
         # Read configuration and validate
         read_config(options)
 
-       # Display oauth token if exist, otherwise authenticate to get one
+        # Display oauth token if exist, otherwise authenticate to get one
         if _trakt['oauth_token']:
             _headers['Authorization'] = 'Bearer ' + _trakt['oauth_token']
             _headers['trakt-api-key'] = _trakt['client_id']
@@ -314,6 +351,10 @@ def main():
         if options.verbose:
             print "API Trakt: {}".format(_trakt)
             print "Authorization header: {}".format(_headers['Authorization'])
+
+        # Empty list prior to import
+        if options.clean:
+            cleanup_list(options)
 
         # Read CSV list of IDs
         read_ids = read_csv(options)
@@ -326,7 +367,7 @@ def main():
             for myid in read_ids:
                 if myid:
                     # if not "imdb" it must be a integer
-                    if not options.format == "imdb" and myid[0].startswith('tt'):
+                    if not options.format == "imdb" and not myid[0].startswith('tt'):
                         myid[0] = int(myid[0])
                     if (options.type == "movies" or options.type == "shows") and options.seen:
                         data.append({'ids':{options.format : myid[0]}, "watched_at": options.seen})
