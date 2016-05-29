@@ -23,7 +23,7 @@ try:
         requests.packages.urllib3.disable_warnings()
         import csv
 except:
-        sys.exit("Please use your favorite mehtod to install the following module requests and simplejson and csv to use this script")
+        sys.exit("Please use your favorite mehtod to install the following module requests and simplejson to use this script")
 
 import argparse
 import ConfigParser
@@ -143,7 +143,7 @@ def api_auth(options):
               "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
                   _trakt["client_id"]))
         pincode = str(raw_input('Input:'))
-        url = _trakt['baseurl'] + 'oauth/token'
+        url = _trakt['baseurl'] + '/oauth/token'
         values = {
             "code": pincode,
             "client_id": _trakt["client_id"],
