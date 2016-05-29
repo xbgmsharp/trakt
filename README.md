@@ -38,21 +38,21 @@ Python 2.7.11
 
 ## Usage
 
-* Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications
-You only need to fill up the ``Name`` and the ``Description``, leave the rest empty and click on ``SAVE APP``.
+* Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications.
+You only need to fill up the ``Name`` with a ``Description`` and ``Redirect uri`` to whatever (i.e. https://zapp.com, it is not being used), leave the rest empty and click on ``SAVE APP``.
 
 * Run the script to create a default config file ``config.ini``
 
+        $ python export_trakt.py
+
 * Edit the config file ``config.ini`` and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: URL, proxy, etc...
+Refer to ``Configuration details`` section for more information.
+
+        $ vim config.ini
 
 * Run the script to authenticate against Trakt.tv API using the PIN method and it will generate you an ``oauth_token``.
 You will be prompted to open a link into a browser and paste the pincode back to the script. 
-Make sure you save you ``oauth_token`` into the config file ``config.ini`` for later use.
-
-
-        $ python export_trakt.py
-
-        $ vim config.ini
+Make sure you save the generated ``oauth_token`` into the config file ``config.ini`` for later use.
 
         $ python export_trakt.py
 
