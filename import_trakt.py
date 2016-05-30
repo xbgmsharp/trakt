@@ -301,7 +301,7 @@ def main():
                       nargs='?', type=argparse.FileType('r'), default=None, required=True)
         parser.add_argument('-f', '--format',
                       help='allow to overwrite default ID type format, default %(default)s',
-                      choices=['imdb', 'tmdb', 'tvdb', 'tvrage'], dest='format', default='imdb')
+                      choices=['imdb', 'tmdb', 'tvdb', 'tvrage', 'trakt'], dest='format', default='imdb')
         parser.add_argument('-t', '--type',
                       help='allow to overwrite type, default %(default)s',
                       choices=['movies', 'shows', 'episodes'], dest='type', default='movies')
@@ -371,7 +371,7 @@ def main():
                         myid[0] = int(myid[0])
                     if (options.type == "movies" or options.type == "shows") and options.seen:
                         data.append({'ids':{options.format : myid[0]}, "watched_at": options.seen})
-                    elif options.type == "episodes" and options.seen:
+                    elif options.type == "episodes" and options.seen and myid[1] and myid[2]:
                         data.append({'ids':{options.format : myid[0]}, 
                             "seasons": [ { "number": int(myid[1]), "episodes" : 
                             [ { "number": int(myid[2]), "watched_at": options.seen} ] } ] })
