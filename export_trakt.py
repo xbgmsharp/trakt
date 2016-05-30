@@ -329,7 +329,7 @@ def main():
                 # TODO add filter
                 #if data[options.time] == "2012-01-01T00:00:00.000Z":
                 to_remove.append({'ids': data[options.type[:-1]]['ids']})
-                if len(to_remove) >= 10:
+                if len(to_remove) >= 10: # Remove by batch of 10
                     cleanup_results['sentids'] += len(to_remove)
                     result = api_remove_from_list(options, to_remove)
                     if result:
@@ -374,13 +374,25 @@ def main():
                             to_remove.append(data['id'])
                             dup_results['sentids'] += len(to_remove)
                             result = api_remove_from_list(options, to_remove, is_id=True)
-                            if result:
-                                print "Result: {0}".format(result)
-                                if 'deleted' in result and result['deleted']:
-                                    dup_results['deleted'] += result['deleted'][options.type]
-                                if 'not_found' in result and result['not_found']:
-                                    dup_results['not_found'] += len(result['not_found'][options.type])
-                                to_remove = []
+                            if len(to_remove) >= 10: # Remove by batch of 10
+                                if result:
+                                    print "Result: {0}".format(result)
+                                    if 'deleted' in result and result['deleted']:
+                                        dup_results['deleted'] += result['deleted'][options.type]
+                                    if 'not_found' in result and result['not_found']:
+                                        dup_results['not_found'] += len(result['not_found'][options.type])
+                                    to_remove = []
+            # Remove the rest
+            if len(to_remove) > 0:
+                dup_results['sentids'] += len(to_remove)
+                result = api_remove_from_list(options, to_remove, is_id=True)
+                if result:
+                    print "Result: {0}".format(result)
+                    if 'deleted' in result and result['deleted']:
+                        dup_results['deleted'] += result['deleted'][options.type]
+                    if 'not_found' in result and result['not_found']:
+                        dup_results['not_found'] += len(result['not_found'][options.type])
+                    to_remove = []
             print "Overall {dup} duplicate {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
                 dup=len(dup_ids), sent=dup_results['sentids'], type=options.type, 
                 deleted=dup_results['deleted'], not_found=dup_results['not_found'])
