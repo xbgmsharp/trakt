@@ -90,7 +90,7 @@ proxy_port = 3128
 #### Import usage
 ```text
 usage: import_trakt.py [-h] [-v] [-c CONFIG] -i [INPUT]
-                       [-f {imdb,tmdb,tvdb,tvrage}]
+                       [-f {imdb,tmdb,tvdb,tvrage,trakt}]
                        [-t {movies,shows,episodes}]
                        [-l {watchlist,collection,history}] [-s [SEEN]] [-C]
                        [-V]
@@ -105,7 +105,7 @@ optional arguments:
                         config.ini
   -i [INPUT], --input [INPUT]
                         CSV file to import, default None
-  -f {imdb,tmdb,tvdb,tvrage}, --format {imdb,tmdb,tvdb,tvrage}
+  -f {imdb,tmdb,tvdb,tvrage,trakt}, --format {imdb,tmdb,tvdb,tvrage,trakt}
                         allow to overwrite default ID type format, default
                         imdb
   -t {movies,shows,episodes}, --type {movies,shows,episodes}
@@ -118,8 +118,8 @@ optional arguments:
   -C, --clean           empty list prior to import, default False
   -V, --verbose         print additional verbose information, default True
 
-Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'. Import them into a
-list in Trakt.tv, mark as seen if need.
+Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage' or 'trakt'. Import
+them into a list in Trakt.tv, mark as seen if need.
 ```
 
 #### Export usage

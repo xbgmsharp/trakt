@@ -35,7 +35,7 @@ pp = pprint.PrettyPrinter(indent=4)
 
 desc="""This program import Movies or TVShows IDs into Trakt.tv."""
 
-epilog="""Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage'.
+epilog="""Read a list of ID from 'imdb', 'tmdb', 'tvdb' or 'tvrage' or 'trakt'.
 Import them into a list in Trakt.tv, mark as seen if need."""
 
 _trakt = {
