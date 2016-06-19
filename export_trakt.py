@@ -88,22 +88,22 @@ def read_config(options):
                 try:
                         config = ConfigParser.SafeConfigParser()
                         config.read(_configfile)
-                        if config.has_option('SETTINGS','CLIENT_ID') and len(config.get('SETTINGS','CLIENT_ID')) != 0:
-                                _trakt['client_id'] = config.get('SETTINGS','CLIENT_ID')
+                        if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
+                                _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
                         else:
-                                print 'Error, you must specify a CLIENT_ID'
+                                print 'Error, you must specify a trakt.tv CLIENT_ID'
                                 sys.exit(1)
-                        if config.has_option('SETTINGS','CLIENT_SECRET') and len(config.get('SETTINGS','CLIENT_SECRET')) != 0:
-                                _trakt['client_secret'] = config.get('SETTINGS','CLIENT_SECRET')
+                        if config.has_option('TRAKT','CLIENT_SECRET') and len(config.get('TRAKT','CLIENT_SECRET')) != 0:
+                                _trakt['client_secret'] = config.get('TRAKT','CLIENT_SECRET')
                         else:
-                                print 'Error, you must specify a CLIENT_SECRET'
+                                print 'Error, you must specify a trakt.tv CLIENT_SECRET'
                                 sys.exit(1)
-                        if config.has_option('SETTINGS','OAUTH_TOKEN') and len(config.get('SETTINGS','OAUTH_TOKEN')) != 0:
-                                _trakt['oauth_token'] = config.get('SETTINGS','OAUTH_TOKEN')
+                        if config.has_option('TRAKT','OAUTH_TOKEN') and len(config.get('TRAKT','OAUTH_TOKEN')) != 0:
+                                _trakt['oauth_token'] = config.get('TRAKT','OAUTH_TOKEN')
                         else:
                                 print 'Warning, authentification is required'
-                        if config.has_option('SETTINGS','BASEURL'):
-                                _trakt['baseurl'] = config.get('SETTINGS','BASEURL')
+                        if config.has_option('TRAKT','BASEURL'):
+                                _trakt['baseurl'] = config.get('TRAKT','BASEURL')
                         if config.has_option('SETTINGS','PROXY'):
                                 _proxy['proxy'] = config.getboolean('SETTINGS','PROXY')
                         if _proxy['proxy'] and config.has_option('SETTINGS','PROXY_HOST') and config.has_option('SETTINGS','PROXY_PORT'):
@@ -118,11 +118,12 @@ def read_config(options):
                 try:
                         print '%s file was not found!' % _configfile
                         config = ConfigParser.RawConfigParser()
+                        config.add_section('TRAKT')
+                        config.set('TRAKT', 'CLIENT_ID', '')
+                        config.set('TRAKT', 'CLIENT_SECRET', '')
+                        config.set('TRAKT', 'OAUTH_TOKEN', '')
+                        config.set('TRAKT', 'BASEURL', 'https://api-v2launch.trakt.tv')
                         config.add_section('SETTINGS')
-                        config.set('SETTINGS', 'CLIENT_ID', '')
-                        config.set('SETTINGS', 'CLIENT_SECRET', '')
-                        config.set('SETTINGS', 'OAUTH_TOKEN', '')
-                        config.set('SETTINGS', 'BASEURL', 'https://api-v2launch.trakt.tv')
                         config.set('SETTINGS', 'PROXY', False)
                         config.set('SETTINGS', 'PROXY_HOST', 'https://127.0.0.1')
                         config.set('SETTINGS', 'PROXY_PORT', '3128')
@@ -248,7 +249,7 @@ def main():
                       help='empty list after export, default %(default)s',
                       default=False, action='store_true', dest='clean')
         parser.add_argument('-D', '--duplicate',
-                      help='Remove duplicate from list after export, default %(default)s',
+                      help='remove duplicate from list after export, default %(default)s',
                       default=False, action='store_true', dest='dup')
         #parser.add_argument('-d', '--dryrun',
         #              help='do not update the account, default %(default)s',
