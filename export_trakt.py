@@ -308,9 +308,7 @@ def main():
             if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
-                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
-                                    options.time : data[options.time],
-                                    'list_id' : data['id']})
+                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt']})
             elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
