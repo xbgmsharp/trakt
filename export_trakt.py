@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2017 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Export Movies or TVShows IDs from Trakt.tv
@@ -139,7 +139,7 @@ def write_csv(options, results):
         if options.verbose:
                 print "CSV output file: {0}".format(options.output)
         # Write result CSV
-        with open(options.output, 'w') as fp:
+        with open(options.output, 'wb') as fp:
                 keys = {}
                 for i in results:
                     for k in i.keys():
@@ -231,8 +231,8 @@ def main():
         * Cleanup list from Trakt.tv
         * Write to CSV
         """
-        # Parse inputs if any
-        parser = argparse.ArgumentParser(version='%(prog)s 0.1', description=desc, epilog=epilog)
+        ## Parse inputs if any
+        parser = argparse.ArgumentParser(version='%(prog)s 0.2', description=desc, epilog=epilog)
         parser.add_argument('-c', '--config',
                       help='allow to overwrite default config filename, default %(default)s',
                       action='store', type=str, dest='config', default='config.ini')
@@ -259,7 +259,7 @@ def main():
                       default=True, action='store_true', dest='verbose')
         options = parser.parse_args()
 
-        # Display debug information
+        ## Display debug information
         if options.verbose:
             print "Options: %s" % options
 
@@ -270,22 +270,22 @@ def main():
         if not options.output:
             options.output = 'export_{type}_{list}.csv'.format(type=options.type, list=options.list)
 
-        # Read configuration and validate
+        ## Read configuration and validate
         read_config(options)
 
-        # Display oauth token if exist, otherwise authenticate to get one
+        ## Display oauth token if exist, otherwise authenticate to get one
         if _trakt['oauth_token']:
             _headers['Authorization'] = 'Bearer ' + _trakt['oauth_token']
             _headers['trakt-api-key'] = _trakt['client_id']
         else:
             api_auth(options)
 
-        # Display debug information
+        ## Display debug information
         if options.verbose:
             print "trakt: {}".format(_trakt)
             print "Authorization header: {}".format(_headers['Authorization'])
 
-        # Get data from Trakt
+        ## Get data from Trakt
         export_data = api_get_list(options, 1)
         if export_data:
             print "Found {0} Item-Count".format(len(export_data))
@@ -308,7 +308,8 @@ def main():
             if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
-                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt']})
+                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
+                                    'title' : data[options.type[:-1]]['title'].encode('utf-8')})
             elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
@@ -317,10 +318,10 @@ def main():
                                     'season' : data[options.type[:-1]]['season'],
                                     'episode' : data[options.type[:-1]]['number']})
         #print export_csv
-        # Write export data into CSV file
+        ## Write export data into CSV file
         write_csv(options, export_csv)
 
-        # Empty list after export
+        ## Empty list after export
         if options.clean:
             cleanup_results = {'sentids' : 0, 'deleted' : 0, 'not_found' : 0}
             to_remove = []
@@ -353,7 +354,7 @@ def main():
                 sent=cleanup_results['sentids'], type=options.type, 
                 deleted=cleanup_results['deleted'], not_found=cleanup_results['not_found'])
 
-        # Found duplicate and remove duplicate
+        ## Found duplicate and remove duplicate
         dup_ids = [item for item, count in collections.Counter(find_dupids).items() if count > 1]
         print "Found {dups} duplicate out of {total} {entry}".format(
                     entry=options.type, dups=len(dup_ids), total=len(find_dupids))
@@ -381,7 +382,7 @@ def main():
                                     if 'not_found' in result and result['not_found']:
                                         dup_results['not_found'] += len(result['not_found'][options.type])
                                     to_remove = []
-            # Remove the rest
+            ## Remove the rest
             if len(to_remove) > 0:
                 dup_results['sentids'] += len(to_remove)
                 result = api_remove_from_list(options, to_remove, is_id=True)
