@@ -198,6 +198,60 @@ def api_get_list(options, page):
 
         return response_arr
 
+def api_get_userlists(options, page):
+        """API call for Sync / Get list by type"""
+        url = _trakt['baseurl'] + '/users/{user}/lists'.format(
+                            user=options.userlist, page=page, limit=1000)
+        #url = _trakt['baseurl'] + '/users/{user}/lists/{list_id}?page={page}&limit={limit}'.format(
+        #                    list=options.list, type=options.type, page=page, limit=1000)
+        if options.verbose:
+            print(url)
+        if _proxy['proxy']:
+            r = requests.get(url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
+        else:
+            r = requests.get(url, headers=_headers, timeout=(5, 60))
+        #pp.pprint(r.headers)
+        if r.status_code != 200:
+            print "Error fetching Get {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text)
+            return None
+        else:
+            global response_arr
+            response_arr += json.loads(r.text)
+        if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
+            print "Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            if page != int(r.headers['X-Pagination-Page-Count']):
+                api_get_list(options, page+1)
+
+        return response_arr
+
+def api_get_userlist(options, page):
+        """API call for Sync / Get list by type"""
+        url = _trakt['baseurl'] + '/users/{user}/lists/{list_id}/items/{type}?page={page}&limit={limit}'.format(
+                            user=options.userlist, list_id=options.listid, type=options.type, page=page, limit=1000)
+        if options.verbose:
+            print(url)
+        if _proxy['proxy']:
+            r = requests.get(url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
+        else:
+            r = requests.get(url, headers=_headers, timeout=(5, 60))
+        #pp.pprint(r.headers)
+        if r.status_code != 200:
+            print "Error fetching Get {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text)
+            return None
+        else:
+            global response_arr
+            response_arr += json.loads(r.text)
+        if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
+            print "Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            if page != int(r.headers['X-Pagination-Page-Count']):
+                api_get_userlist(options, page+1)
+
+        return response_arr
+
 def api_remove_from_list(options, remove_data, is_id=False):
         """API call for Sync / Remove from list"""
         url = _trakt['baseurl'] + '/sync/{list}/remove'.format(list=options.list)
@@ -232,7 +286,7 @@ def main():
         * Write to CSV
         """
         ## Parse inputs if any
-        parser = argparse.ArgumentParser(version='%(prog)s 0.2', description=desc, epilog=epilog)
+        parser = argparse.ArgumentParser(version='%(prog)s 0.3', description=desc, epilog=epilog)
         parser.add_argument('-c', '--config',
                       help='allow to overwrite default config filename, default %(default)s',
                       action='store', type=str, dest='config', default='config.ini')
@@ -245,6 +299,9 @@ def main():
         parser.add_argument('-l', '--list',
                       help='allow to overwrite default list, default %(default)s',
                       choices=['watchlist', 'collection', 'history'], dest='list', default='history')
+        parser.add_argument('-u', '--userlist',
+                      help='allow to export a user custom list, default %(default)s',
+                      dest='userlist', default=None)
         parser.add_argument('-C', '--clean',
                       help='empty list after export, default %(default)s',
                       default=False, action='store_true', dest='clean')
@@ -267,6 +324,9 @@ def main():
             print "Error, you can only fetch {0} from the history or watchlist list".format(options.type)
             sys.exit(1)
 
+        if options.userlist:
+            options.list = options.userlist
+
         if not options.output:
             options.output = 'export_{type}_{list}.csv'.format(type=options.type, list=options.list)
 
@@ -285,14 +345,37 @@ def main():
             print "trakt: {}".format(_trakt)
             print "Authorization header: {}".format(_headers['Authorization'])
 
+        ## Get lits from Trakt user
+        if options.userlist:
+            export_data = api_get_userlists(options, 1)
+            if export_data:
+                print "Found {0} user list".format(len(export_data))
+                #pp.pprint(export_data)
+                for data in export_data:
+                    print "Found list id '{id}' name '{name}' with {items} items own by {own}".format(
+                            name=data['name'], id=data['ids']['trakt'], items=data['item_count'], own=data['user']['username'])
+                print("Input the custom list id to export")
+                options.listid = str(raw_input('Input:'))
+                global response_arr ## Cleanup global....
+                response_arr = []
+                export_data = api_get_userlist(options, 1)
+                #pp.pprint(export_data)
+                if export_data:
+                    print "Found {0} Item-Count".format(len(export_data))
+            else:
+                print "Error, no item return for {type} from the user list {list}".format(
+                    type=options.type, list=options.userlist)
+                sys.exit(1)
+
         ## Get data from Trakt
-        export_data = api_get_list(options, 1)
-        if export_data:
-            print "Found {0} Item-Count".format(len(export_data))
-        else:
-            print "Error, no item return for {type} from the {list} list".format(
-                type=options.type, list=options.list)
-            sys.exit(1)
+        if not export_data:
+            export_data = api_get_list(options, 1)
+            if export_data:
+                print "Found {0} Item-Count".format(len(export_data))
+            else:
+                print "Error, no item return for {type} from the {list} list".format(
+                    type=options.type, list=options.list)
+                sys.exit(1)
 
         if options.list == 'history':
             options.time = 'watched_at'
