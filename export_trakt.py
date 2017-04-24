@@ -346,6 +346,7 @@ def main():
             print "Authorization header: {}".format(_headers['Authorization'])
 
         ## Get lits from Trakt user
+        export_data = []
         if options.userlist:
             export_data = api_get_userlists(options, 1)
             if export_data:
@@ -392,6 +393,7 @@ def main():
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
+                                    options.time : data[options.time],
                                     'title' : data[options.type[:-1]]['title'].encode('utf-8')})
             elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
