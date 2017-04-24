@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2017 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Import Movies or TVShows IDs into Trakt.tv
@@ -65,6 +65,8 @@ _proxyDict = {
         "http" : _proxy['host']+':'+_proxy['port'],
         "https" : _proxy['host']+':'+_proxy['port']
 }
+
+response_arr = []
 
 def read_config(options):
         """
@@ -336,7 +338,7 @@ def main():
             try:
                 datetime.datetime.strptime(options.seen, '%Y-%m-%dT%H:%M:%S.000Z')
             except:
-                sys.exit("Erro, invalid format, it's must be UTC datetime, eg: '2016-01-01T00:00:00.000Z'")
+                sys.exit("Error, invalid format, it's must be UTC datetime, eg: '2016-01-01T00:00:00.000Z'")
 
         # Read configuration and validate
         read_config(options)
