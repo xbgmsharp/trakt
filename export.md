@@ -94,7 +94,8 @@ proxy_port = 3128
 ```text
 usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
                        [-t {movies,shows,episodes}]
-                       [-l {watchlist,collection,history}] [-C] [-D] [-V]
+                       [-l {watchlist,collection,history}] [-u USERLIST] [-C]
+                       [-D] [-V]
 
 This program export Movies or TVShows IDs from Trakt.tv list.
 
@@ -111,8 +112,10 @@ optional arguments:
                         allow to overwrite type, default movies
   -l {watchlist,collection,history}, --list {watchlist,collection,history}
                         allow to overwrite default list, default history
+  -u USERLIST, --userlist USERLIST
+                        allow to export a user custom list, default None
   -C, --clean           empty list after export, default False
-  -D, --duplicate       Remove duplicate from list after export, default False
+  -D, --duplicate       remove duplicate from list after export, default False
   -V, --verbose         print additional verbose information, default True
 
 Read a list from Trakt API. Export them into a CSV file.
@@ -133,9 +136,13 @@ Export all episodes from the history list:
 
         $ ./export_trakt.py -c config.ini -t episodes -o export_episodes_history.csv -l history
 
-Export all movies from the history list and remove duplicate:
+Export all shows from the history list and remove duplicate:
 
 	$ ./export_trakt.py -c config.ini -t shows -o export_shows_history.csv -l history -D
+
+Export all movies from a user list:
+
+	$ ./export_trakt.py -c config.ini -t movies -o export_movies_username.csv
 
 ## Support
 
