@@ -142,7 +142,7 @@ Export all shows from the history list and remove duplicate:
 
 Export all movies from a user list:
 
-	$ ./export_trakt.py -c config.ini -t movies -o export_movies_username.csv
+	$ ./export_trakt.py -c config.ini -t movies -u <username> -o export_movies_<username>.csv
 
 ## Support
 
