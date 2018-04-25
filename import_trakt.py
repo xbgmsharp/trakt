@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016-2017 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2018 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Import Movies or TVShows IDs into Trakt.tv
@@ -42,7 +42,7 @@ _trakt = {
         'client_id'     :       '', # Auth details for trakt API
         'client_secret' :       '', # Auth details for trakt API
         'oauth_token'   :       '', # Auth details for trakt API
-        'baseurl'       :       'https://api-v2launch.trakt.tv' # Sandbox environment https://api-staging.trakt.tv
+        'baseurl'       :       'https://api.trakt.tv' # Sandbox environment https://api-staging.trakt.tv
 }
 
 _headers = {
@@ -122,7 +122,7 @@ def read_config(options):
                         config.set('TRAKT', 'CLIENT_ID', '')
                         config.set('TRAKT', 'CLIENT_SECRET', '')
                         config.set('TRAKT', 'OAUTH_TOKEN', '')
-                        config.set('TRAKT', 'BASEURL', 'https://api-v2launch.trakt.tv')
+                        config.set('TRAKT', 'BASEURL', 'https://api.trakt.tv')
                         config.add_section('SETTINGS')
                         config.set('SETTINGS', 'PROXY', False)
                         config.set('SETTINGS', 'PROXY_HOST', 'https://127.0.0.1')
