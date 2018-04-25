@@ -384,6 +384,8 @@ def main():
             options.time = 'listed_at'
         elif options.list == 'collection':
             options.time = 'collected_at'
+        elif option.userlist != None:
+            options.time = 'listed_at'
 
         export_csv = []
         find_dupids = []
