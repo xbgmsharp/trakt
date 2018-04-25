@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016-2017 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2018 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Export Movies or TVShows IDs from Trakt.tv
@@ -42,7 +42,7 @@ _trakt = {
         'client_id'     :       '', # Auth details for trakt API
         'client_secret' :       '', # Auth details for trakt API
         'oauth_token'   :       '', # Auth details for trakt API
-        'baseurl'       :       'https://api-v2launch.trakt.tv' # Sandbox environment https://api-staging.trakt.tv
+        'baseurl'       :       'https://api.trakt.tv' # Sandbox environment https://api-staging.trakt.tv
 }
 
 _headers = {
@@ -156,7 +156,7 @@ def api_auth(options):
         print("https://trakt.tv/oauth/authorize?response_type=code&"
               "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
                   _trakt["client_id"]))
-        pincode = str(raw_input('Input:'))
+        pincode = str(raw_input('Input PIN:'))
         url = _trakt['baseurl'] + '/oauth/token'
         values = {
             "code": pincode,
@@ -390,20 +390,22 @@ def main():
         export_csv = []
         find_dupids = []
         for data in export_data:
-            #pp.pprint(data)
-            if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
+           #pp.pprint(data)
+           if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'title' : data[options.type[:-1]]['title'].encode('utf-8')})
-            elif 'tmdb' in data[options.type[:-1]]['ids']:
+           elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'season' : data[options.type[:-1]]['season'],
-                                    'episode' : data[options.type[:-1]]['number']})
+                                    'episode' : data[options.type[:-1]]['number'],
+                                    'episode_title' : data['episode']['title'].encode('utf-8'),
+                                    'show_title' : data['show']['title'].encode('utf-8')})
         #print export_csv
         ## Write export data into CSV file
         write_csv(options, export_csv)
