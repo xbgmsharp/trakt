@@ -122,7 +122,7 @@ def read_config(options):
                         config.set('TRAKT', 'CLIENT_ID', '')
                         config.set('TRAKT', 'CLIENT_SECRET', '')
                         config.set('TRAKT', 'OAUTH_TOKEN', '')
-                        config.set('TRAKT', 'BASEURL', 'https://api-v2launch.trakt.tv')
+                        config.set('TRAKT', 'BASEURL', 'https://api.trakt.tv')
                         config.add_section('SETTINGS')
                         config.set('SETTINGS', 'PROXY', False)
                         config.set('SETTINGS', 'PROXY_HOST', 'https://127.0.0.1')
