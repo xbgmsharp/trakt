@@ -26,12 +26,12 @@ Install need module dependencies
 
 ##### On Windows system
 
- Download the installer: https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi
+ Download the installer: https://www.python.org/ftp/python/2.7.16/python-2.7.16.msi
 
  Ensure you are running Python 2.7
 ```
         C:\Python27>python.exe -V
-Python 2.7.11
+Python 2.7.16
 ```
 
  Install need module dependencies
