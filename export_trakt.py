@@ -399,6 +399,7 @@ def main():
                                     'title' : data[options.type[:-1]]['title'].encode('utf-8')})
            elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
+                if not data['episode']['title']: data['episode']['title'] = "no episode title"
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
