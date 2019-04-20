@@ -174,7 +174,7 @@ def api_auth(options):
 
 def api_get_list(options, page):
         """API call for Sync / Get list by type"""
-        url = _trakt['baseurl'] + '/sync/{list}/{type}?page={page}&limit={limit}'.format(
+        url = _trakt['baseurl'] + '/sync/{list}/{type}?extended=full&page={page}&limit={limit}'.format(
                             list=options.list, type=options.type, page=page, limit=1000)
         if options.verbose:
             print(url)
@@ -189,6 +189,7 @@ def api_get_list(options, page):
             return None
         else:
             global response_arr
+            # pp.pprint(r.text)
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
             print "Fetched page {page} of {PageCount} pages for {list} list".format(
@@ -228,8 +229,10 @@ def api_get_userlists(options, page):
 
 def api_get_userlist(options, page):
         """API call for Sync / Get list by type"""
-        url = _trakt['baseurl'] + '/users/{user}/lists/{list_id}/items/{type}?page={page}&limit={limit}'.format(
-                            user=options.userlist, list_id=options.listid, type=options.type, page=page, limit=1000)
+        # url = _trakt['baseurl'] + '/users/{user}/lists/{list_id}/items/{type}?extended=metadata&page={page}&limit={limit}'.format(
+                            # user=options.userlist, list_id=options.listid, type=options.type, page=page, limit=1000)
+
+        url = _trakt['baseurl'] + '/users/{user}/watched/shows'.format(user=options.userlist)
         if options.verbose:
             print(url)
         if _proxy['proxy']:
@@ -373,6 +376,7 @@ def main():
             export_data = api_get_list(options, 1)
             if export_data:
                 print "Found {0} Item-Count".format(len(export_data))
+                # print "Data {0}".format(export_data)
             else:
                 print "Error, no item return for {type} from the {list} list".format(
                     type=options.type, list=options.list)
@@ -384,19 +388,30 @@ def main():
             options.time = 'listed_at'
         elif options.list == 'collection':
             options.time = 'collected_at'
-        elif option.userlist != None:
+        elif options.userlist != None:
             options.time = 'listed_at'
 
         export_csv = []
         find_dupids = []
         for data in export_data:
-           #pp.pprint(data)
+        #    pp.pprint(data)
+        #    pp.pprint(options.type)
            if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
-                export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
-                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
-                                    options.time : data[options.time],
-                                    'title' : data[options.type[:-1]]['title'].encode('utf-8')})
+                if options.type == "movies":
+                    export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
+                                        'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
+                                        options.time : data[options.time],
+                                        'title' : data[options.type[:-1]]['title'].encode('utf-8'),
+                                        'duration' : data['movie']['runtime']})
+                    pp.pprint('Hit here')
+                if options.type == "shows":
+                    export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
+                                        'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
+                                        options.time : data[options.time],
+                                        'title' : data[options.type[:-1]]['title'].encode('utf-8'),
+                                        'duration' : data['show']['runtime']})
+                    
            elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 if not data['episode']['title']: data['episode']['title'] = "no episode title"
@@ -406,7 +421,8 @@ def main():
                                     'season' : data[options.type[:-1]]['season'],
                                     'episode' : data[options.type[:-1]]['number'],
                                     'episode_title' : data['episode']['title'].encode('utf-8'),
-                                    'show_title' : data['show']['title'].encode('utf-8')})
+                                    'show_title' : data['show']['title'].encode('utf-8'),
+                                    'duration' : data['show']['runtime']})
         #print export_csv
         ## Write export data into CSV file
         write_csv(options, export_csv)
