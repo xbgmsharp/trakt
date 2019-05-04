@@ -3,9 +3,7 @@
 ## Purpose
 
  * Import Movies or TVShows IDs from CSV file format into Trakt.tv.
-
  * Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
-
  * Create trakt.tv custom list from TDMB discover with filter.
 
 ## Requirements
@@ -16,13 +14,15 @@ You must use Python 2.7.x.
 
 Ensure you are running Python 2.7
 ```
-        $ python -V
+$ python -V
 Python 2.7.9
 ```
 
 Install need module dependencies
 
-        $ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+```
+$ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+```
 
 ##### On Windows system
 
@@ -30,13 +30,15 @@ Install need module dependencies
 
  Ensure you are running Python 2.7
 ```
-        C:\Python27>python.exe -V
+C:\Python27>python.exe -V
 Python 2.7.16
 ```
 
  Install need module dependencies
 
-        C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
+```
+C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
+```
 
 ## Usage
 
@@ -45,22 +47,29 @@ You only need to fill up the ``Name`` with a ``Description`` and ``Redirect uri`
 
 * Run the script to create a default config file ``config.ini``
 
-        $ python export_trakt.py
+```
+$ python export_trakt.py
+```
 
 * Edit the config file ``config.ini`` and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: URL, proxy, etc...
 Refer to ``Configuration details`` section for more information.
 
-        $ vim config.ini
+```
+$ vim config.ini
+```
 
 * Run the script to authenticate against Trakt.tv API using the PIN method and it will generate you an ``oauth_token``.
 You will be prompted to open a link into a browser and paste the pincode back to the script. 
 Make sure you save the generated ``oauth_token`` into the config file ``config.ini`` for later use.
 
-        $ python export_trakt.py
+```
+$ python export_trakt.py
+```
 
 ## Configuration
 
 #### Configuration sample
+
 ```text
 [TRAKT]
 client_id = xxxxxxxxxxxxxxxxxxxxxxxxx
@@ -85,12 +94,14 @@ proxy_port = 3128
 
 ## Developer documentation
 
-        $ pydoc `pwd`/import_trakt.py
-
-        $ pydoc `pwd`/export_trakt.py
+```
+$ pydoc `pwd`/import_trakt.py
+$ pydoc `pwd`/export_trakt.py
+```
 
 ## Usage 
 ### Import usage
+
 ```text
 usage: import_trakt.py [-h] [-v] [-c CONFIG] -i [INPUT]
                        [-f {imdb,tmdb,tvdb,tvrage,trakt}]
@@ -126,23 +137,24 @@ them into a list in Trakt.tv, mark as seen if need.
 ```
 
 ## Examples
+
 ### Sample import usage
 
 Import all movies with imdb id from file ``movies_favorites.csv`` into watchlist:
 
-        $ ./import_trakt.py -c config.ini -f imdb -t movies -i movies_favorites.csv -l watchlist
+	$ ./import_trakt.py -c config.ini -f imdb -t movies -i movies_favorites.csv -l watchlist
 
 Import all tvshows with imdb id from file ``tvshows_favorites.csv`` into watchlist:
 
-        $ ./import_trakt.py -c config.ini -f imdb -i  tvshows_favorites.csv -l watchlist -t shows
+	$ ./import_trakt.py -c config.ini -f imdb -i  tvshows_favorites.csv -l watchlist -t shows
 
 Import all movies with imdb id from file ``movies_views.csv`` into history and mark as seen:
 
-        $ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -s
+	$ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -s
 
 Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen on 1 January 2014
 
-        $ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s 2014-01-01T00:00:00.000Z
+	$ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s 2014-01-01T00:00:00.000Z
 
 #### Movies to add watchlist
 No header line.
