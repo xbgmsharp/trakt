@@ -41,7 +41,7 @@ Python 2.7.16
 ## Usage
 
 * Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications.
-You only need to fill up the ``Name`` with a ``Description`` and ``Redirect uri`` to whatever (i.e. https://zapp.com, it is not being used), leave the rest empty and click on ``SAVE APP``.
+You only need to fill up the ``Name`` with a ``Description`` and ``Redirect uri`` to `urn:ietf:wg:oauth:2.0:oob`, leave the rest empty and click on ``SAVE APP``.
 
 * Run the script to create a default config file ``config.ini``
 
