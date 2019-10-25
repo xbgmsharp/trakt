@@ -1,15 +1,18 @@
 #  CouchPotato export
 
 ## Purpose
-Export Movies from CouchPotato into CSV file format.
+
+* Export Movies from CouchPotato into CSV file format.
 
 ## Export view (history) movies
 
 Export your views movies into ``movies_views.csv``
 
-        $ sqlite3 .couchpotato/couchpotato.db "select identifier from library INNER JOIN movie ON library.id=movie.library_id where movie.status_id=10;" > coucouchpotato_movies.csv
+```
+$ sqlite3 .couchpotato/couchpotato.db "select identifier from library INNER JOIN movie ON library.id=movie.library_id where movie.status_id=10;" > coucouchpotato_movies.csv
+```
 
-From the sqlite promt
+From the sqlite prompt
 ```sql
 sqlite> .schema movie
 CREATE TABLE movie (
