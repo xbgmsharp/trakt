@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # (c) Copyright 2016-2018 xbgmsharp <xbgmsharp@gmail.com>
@@ -7,10 +7,10 @@
 # Export Movies or TVShows IDs from Trakt.tv
 #
 # Requirement on Ubuntu/Debian Linux system
-# apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+# apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 #
 # Requirement on Windows on Python 2.7
-# C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
+# C:\Python3\Scripts\easy_install3.exe simplejson requests
 #
 
 import sys, os
@@ -23,10 +23,10 @@ try:
         requests.packages.urllib3.disable_warnings()
         import csv
 except:
-        sys.exit("Please use your favorite mehtod to install the following module requests and simplejson to use this script")
+        sys.exit("Please use your favorite method to install the following module requests and simplejson to use this script")
 
 import argparse
-import ConfigParser
+import configparser
 import datetime
 import collections
 import pprint
@@ -83,25 +83,25 @@ def read_config(options):
         if os.path.exists(options.config):
                 _configfile = options.config
         if options.verbose:
-                print "Config file: {0}".format(_configfile)
+                print("Config file: {0}".format(_configfile))
         if os.path.exists(_configfile):
                 try:
-                        config = ConfigParser.SafeConfigParser()
+                        config = configparser.ConfigParser()
                         config.read(_configfile)
                         if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
                         else:
-                                print 'Error, you must specify a trakt.tv CLIENT_ID'
+                                print('Error, you must specify a trakt.tv CLIENT_ID')
                                 sys.exit(1)
                         if config.has_option('TRAKT','CLIENT_SECRET') and len(config.get('TRAKT','CLIENT_SECRET')) != 0:
                                 _trakt['client_secret'] = config.get('TRAKT','CLIENT_SECRET')
                         else:
-                                print 'Error, you must specify a trakt.tv CLIENT_SECRET'
+                                print('Error, you must specify a trakt.tv CLIENT_SECRET')
                                 sys.exit(1)
                         if config.has_option('TRAKT','OAUTH_TOKEN') and len(config.get('TRAKT','OAUTH_TOKEN')) != 0:
                                 _trakt['oauth_token'] = config.get('TRAKT','OAUTH_TOKEN')
                         else:
-                                print 'Warning, authentification is required'
+                                print('Warning, authentification is required')
                         if config.has_option('TRAKT','BASEURL'):
                                 _trakt['baseurl'] = config.get('TRAKT','BASEURL')
                         if config.has_option('SETTINGS','PROXY'):
@@ -112,12 +112,12 @@ def read_config(options):
                                 _proxyDict['http'] = _proxy['host']+':'+_proxy['port']
                                 _proxyDict['https'] = _proxy['host']+':'+_proxy['port']
                 except:
-                        print "Error reading configuration file {0}".format(_configfile)
+                        print("Error reading configuration file {0}".format(_configfile))
                         sys.exit(1)
         else:
                 try:
-                        print '%s file was not found!' % _configfile
-                        config = ConfigParser.RawConfigParser()
+                        print('%s file was not found!' % _configfile)
+                        config = configparser.RawConfigParser()
                         config.add_section('TRAKT')
                         config.set('TRAKT', 'CLIENT_ID', '')
                         config.set('TRAKT', 'CLIENT_SECRET', '')
@@ -129,22 +129,22 @@ def read_config(options):
                         config.set('SETTINGS', 'PROXY_PORT', '3128')
                         with open(_configfile, 'wb') as configfile:
                                 config.write(configfile)
-                                print "Default settings wrote to file {0}".format(_configfile)
+                                print("Default settings wrote to file {0}".format(_configfile))
                 except:
-                        print "Error writing configuration file {0}".format(_configfile)
+                        print("Error writing configuration file {0}".format(_configfile))
                 sys.exit(1)
 
 def write_csv(options, results):
         """Write list output into a CSV file format"""
         if options.verbose:
-                print "CSV output file: {0}".format(options.output)
+                print("CSV output file: {0}".format(options.output))
         # Write result CSV
-        with open(options.output, 'wb') as fp:
+        with open(options.output, 'w') as fp:
                 keys = {}
                 for i in results:
-                    for k in i.keys():
+                    for k in list(i.keys()):
                         keys[k] = 1
-                mycsv = csv.DictWriter(fp, fieldnames=keys.keys(), quoting=csv.QUOTE_ALL)
+                mycsv = csv.DictWriter(fp, fieldnames=list(keys.keys()), quoting=csv.QUOTE_ALL)
                 mycsv.writeheader()
                 for row in results:
                         mycsv.writerow(row)
@@ -153,10 +153,10 @@ def write_csv(options, results):
 def api_auth(options):
         """API call for authentification OAUTH"""
         print("Open the link in a browser and paste the pincode when prompted")
-        print("https://trakt.tv/oauth/authorize?response_type=code&"
+        print(("https://trakt.tv/oauth/authorize?response_type=code&"
               "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-                  _trakt["client_id"]))
-        pincode = str(raw_input('Input PIN:'))
+                  _trakt["client_id"])))
+        pincode = str(input('Input PIN:'))
         url = _trakt['baseurl'] + '/oauth/token'
         values = {
             "code": pincode,
@@ -170,7 +170,7 @@ def api_auth(options):
         response = request.json()
         _headers['Authorization'] = 'Bearer ' + response["access_token"]
         _headers['trakt-api-key'] = _trakt['client_id']
-        print 'Save as "oauth_token" in file {0}: {1}'.format(options.config, response["access_token"])
+        print('Save as "oauth_token" in file {0}: {1}'.format(options.config, response["access_token"]))
 
 def api_get_list(options, page):
         """API call for Sync / Get list by type"""
@@ -184,15 +184,15 @@ def api_get_list(options, page):
             r = requests.get(url, headers=_headers, timeout=(5, 60))
         #pp.pprint(r.headers)
         if r.status_code != 200:
-            print "Error fetching Get {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error fetching Get {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
-            print "Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            print("Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_list(options, page+1)
 
@@ -212,15 +212,15 @@ def api_get_userlists(options, page):
             r = requests.get(url, headers=_headers, timeout=(5, 60))
         #pp.pprint(r.headers)
         if r.status_code != 200:
-            print "Error fetching Get {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error fetching Get {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
-            print "Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            print("Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_list(options, page+1)
 
@@ -238,15 +238,15 @@ def api_get_userlist(options, page):
             r = requests.get(url, headers=_headers, timeout=(5, 60))
         #pp.pprint(r.headers)
         if r.status_code != 200:
-            print "Error fetching Get {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error fetching Get {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
-            print "Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            print("Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_userlist(options, page+1)
 
@@ -270,8 +270,8 @@ def api_remove_from_list(options, remove_data, is_id=False):
         else:
             r = requests.post(url, data=json_data, headers=_headers, timeout=(5, 60))
         if r.status_code != 200:
-            print "Error removing items from {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error removing items from {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             return json.loads(r.text)
@@ -286,7 +286,8 @@ def main():
         * Write to CSV
         """
         ## Parse inputs if any
-        parser = argparse.ArgumentParser(version='%(prog)s 0.3', description=desc, epilog=epilog)
+        parser = argparse.ArgumentParser(description=desc, epilog=epilog)
+        parser.add_argument('-v', action='version', version='%(prog)s 0.3')
         parser.add_argument('-c', '--config',
                       help='allow to overwrite default config filename, default %(default)s',
                       action='store', type=str, dest='config', default='config.ini')
@@ -318,10 +319,10 @@ def main():
 
         ## Display debug information
         if options.verbose:
-            print "Options: %s" % options
+            print("Options: %s" % options)
 
         if options.type == 'episodes' and options.list == "collection":
-            print "Error, you can only fetch {0} from the history or watchlist list".format(options.type)
+            print("Error, you can only fetch {0} from the history or watchlist list".format(options.type))
             sys.exit(1)
 
         if options.userlist:
@@ -342,40 +343,40 @@ def main():
 
         ## Display debug information
         if options.verbose:
-            print "trakt: {}".format(_trakt)
-            print "Authorization header: {}".format(_headers['Authorization'])
+            print("trakt: {}".format(_trakt))
+            print("Authorization header: {}".format(_headers['Authorization']))
 
         ## Get lits from Trakt user
         export_data = []
         if options.userlist:
             export_data = api_get_userlists(options, 1)
             if export_data:
-                print "Found {0} user list".format(len(export_data))
+                print("Found {0} user list".format(len(export_data)))
                 #pp.pprint(export_data)
                 for data in export_data:
-                    print "Found list id '{id}' name '{name}' with {items} items own by {own}".format(
-                            name=data['name'], id=data['ids']['trakt'], items=data['item_count'], own=data['user']['username'])
+                    print("Found list id '{id}' name '{name}' with {items} items own by {own}".format(
+                            name=data['name'], id=data['ids']['trakt'], items=data['item_count'], own=data['user']['username']))
                 print("Input the custom list id to export")
-                options.listid = str(raw_input('Input:'))
+                options.listid = str(input('Input:'))
                 global response_arr ## Cleanup global....
                 response_arr = []
                 export_data = api_get_userlist(options, 1)
                 #pp.pprint(export_data)
                 if export_data:
-                    print "Found {0} Item-Count".format(len(export_data))
+                    print("Found {0} Item-Count".format(len(export_data)))
             else:
-                print "Error, no item return for {type} from the user list {list}".format(
-                    type=options.type, list=options.userlist)
+                print("Error, no item return for {type} from the user list {list}".format(
+                    type=options.type, list=options.userlist))
                 sys.exit(1)
 
         ## Get data from Trakt
         if not export_data:
             export_data = api_get_list(options, 1)
             if export_data:
-                print "Found {0} Item-Count".format(len(export_data))
+                print("Found {0} Item-Count".format(len(export_data)))
             else:
-                print "Error, no item return for {type} from the {list} list".format(
-                    type=options.type, list=options.list)
+                print("Error, no item return for {type} from the {list} list".format(
+                    type=options.type, list=options.list))
                 sys.exit(1)
 
         if options.list == 'history':
@@ -384,7 +385,7 @@ def main():
             options.time = 'listed_at'
         elif options.list == 'collection':
             options.time = 'collected_at'
-        elif option.userlist != None:
+        elif options.userlist != None:
             options.time = 'listed_at'
 
         export_csv = []
@@ -396,7 +397,7 @@ def main():
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
                                     'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
-                                    'title' : data[options.type[:-1]]['title'].encode('utf-8')})
+                                    'title' : data[options.type[:-1]]['title']})
            elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 if not data['episode']['title']: data['episode']['title'] = "no episode title"
@@ -405,8 +406,8 @@ def main():
                                     options.time : data[options.time],
                                     'season' : data[options.type[:-1]]['season'],
                                     'episode' : data[options.type[:-1]]['number'],
-                                    'episode_title' : data['episode']['title'].encode('utf-8'),
-                                    'show_title' : data['show']['title'].encode('utf-8')})
+                                    'episode_title' : data['episode']['title'],
+                                    'show_title' : data['show']['title']})
         #print export_csv
         ## Write export data into CSV file
         write_csv(options, export_csv)
@@ -423,7 +424,7 @@ def main():
                     cleanup_results['sentids'] += len(to_remove)
                     result = api_remove_from_list(options, to_remove)
                     if result:
-                        print "Result: {0}".format(result)
+                        print("Result: {0}".format(result))
                         if 'deleted' in result and result['deleted']:
                             cleanup_results['deleted'] += result['deleted'][options.type]
                         if 'not_found' in result and result['not_found']:
@@ -435,22 +436,22 @@ def main():
                 cleanup_results['sentids'] += len(to_remove)
                 result = api_remove_from_list(options, to_remove)
                 if result:
-                    print "Result: {0}".format(result)
+                    print("Result: {0}".format(result))
                     if 'deleted' in result and result['deleted']:
                         cleanup_results['deleted'] += result['deleted'][options.type]
                     if 'not_found' in result and result['not_found']:
                         cleanup_results['not_found'] += len(result['not_found'][options.type])
-            print "Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
+            print("Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
                 sent=cleanup_results['sentids'], type=options.type, 
-                deleted=cleanup_results['deleted'], not_found=cleanup_results['not_found'])
+                deleted=cleanup_results['deleted'], not_found=cleanup_results['not_found']))
 
         ## Found duplicate and remove duplicate
-        dup_ids = [item for item, count in collections.Counter(find_dupids).items() if count > 1]
-        print "Found {dups} duplicate out of {total} {entry}".format(
-                    entry=options.type, dups=len(dup_ids), total=len(find_dupids))
+        dup_ids = [item for item, count in list(collections.Counter(find_dupids).items()) if count > 1]
+        print("Found {dups} duplicate out of {total} {entry}".format(
+                    entry=options.type, dups=len(dup_ids), total=len(find_dupids)))
         if options.dup:
             if len(dup_ids) > 0:
-                print dup_ids
+                print(dup_ids)
             dup_results = {'sentids' : 0, 'deleted' : 0, 'not_found' : 0}
             to_remove = []
             for dupid in find_dupids:
@@ -460,13 +461,13 @@ def main():
                         #print "{0} {1}".format(dupid, data['id'])
                         count += 1
                         if count > 1:
-                            print "Removing {0} {1}".format(dupid, data['id'])
+                            print("Removing {0} {1}".format(dupid, data['id']))
                             to_remove.append(data['id'])
                             dup_results['sentids'] += len(to_remove)
                             result = api_remove_from_list(options, to_remove, is_id=True)
                             if len(to_remove) >= 10: # Remove by batch of 10
                                 if result:
-                                    print "Result: {0}".format(result)
+                                    print("Result: {0}".format(result))
                                     if 'deleted' in result and result['deleted']:
                                         dup_results['deleted'] += result['deleted'][options.type]
                                     if 'not_found' in result and result['not_found']:
@@ -477,15 +478,15 @@ def main():
                 dup_results['sentids'] += len(to_remove)
                 result = api_remove_from_list(options, to_remove, is_id=True)
                 if result:
-                    print "Result: {0}".format(result)
+                    print("Result: {0}".format(result))
                     if 'deleted' in result and result['deleted']:
                         dup_results['deleted'] += result['deleted'][options.type]
                     if 'not_found' in result and result['not_found']:
                         dup_results['not_found'] += len(result['not_found'][options.type])
                     to_remove = []
-            print "Overall {dup} duplicate {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
+            print("Overall {dup} duplicate {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
                 dup=len(dup_ids), sent=dup_results['sentids'], type=options.type, 
-                deleted=dup_results['deleted'], not_found=dup_results['not_found'])
+                deleted=dup_results['deleted'], not_found=dup_results['not_found']))
 
 if __name__ == '__main__':
         main()
