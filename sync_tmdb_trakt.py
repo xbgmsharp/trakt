@@ -9,8 +9,8 @@
 # Requirement on Ubuntu/Debian Linux system
 # apt-get install python-dateutil python-simplejson python-requests python-openssl jq
 #
-# Requirement on Windows on Python 2.7
-# C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
+# Requirement on Windows on Python 3
+# <python dir>\Scripts\pip3.exe install requests simplejson
 #
 
 import sys, os
