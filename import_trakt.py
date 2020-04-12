@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 # (c) Copyright 2016-2018 xbgmsharp <xbgmsharp@gmail.com>
@@ -7,10 +7,10 @@
 # Import Movies or TVShows IDs into Trakt.tv
 #
 # Requirement on Ubuntu/Debian Linux system
-# apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+# apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 #
-# Requirement on Windows on Python 2.7
-# C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests
+# Requirement on Windows on Python 3
+# C:\Python3\Scripts\easy_install3.exe simplejson requests
 #
 
 import sys, os
@@ -26,7 +26,7 @@ except:
         sys.exit("Please use your favorite mehtod to install the following module requests and simplejson to use this script")
 
 import argparse
-import ConfigParser
+import configparser
 import datetime
 import collections
 import pprint
@@ -83,25 +83,25 @@ def read_config(options):
         if os.path.exists(options.config):
                 _configfile = options.config
         if options.verbose:
-                print "Config file: {0}".format(_configfile)
+                print("Config file: {0}".format(_configfile))
         if os.path.exists(_configfile):
                 try:
-                        config = ConfigParser.SafeConfigParser()
+                        config = configparser.ConfigParser()
                         config.read(_configfile)
                         if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
                         else:
-                                print 'Error, you must specify a trakt.tv CLIENT_ID'
+                                print('Error, you must specify a trakt.tv CLIENT_ID')
                                 sys.exit(1)
                         if config.has_option('TRAKT','CLIENT_SECRET') and len(config.get('TRAKT','CLIENT_SECRET')) != 0:
                                 _trakt['client_secret'] = config.get('TRAKT','CLIENT_SECRET')
                         else:
-                                print 'Error, you must specify a trakt.tv CLIENT_SECRET'
+                                print('Error, you must specify a trakt.tv CLIENT_SECRET')
                                 sys.exit(1)
                         if config.has_option('TRAKT','OAUTH_TOKEN') and len(config.get('TRAKT','OAUTH_TOKEN')) != 0:
                                 _trakt['oauth_token'] = config.get('TRAKT','OAUTH_TOKEN')
                         else:
-                                print 'Warning, authentification is required'
+                                print('Warning, authentification is required')
                         if config.has_option('TRAKT','BASEURL'):
                                 _trakt['baseurl'] = config.get('TRAKT','BASEURL')
                         if config.has_option('SETTINGS','PROXY'):
@@ -112,12 +112,12 @@ def read_config(options):
                                 _proxyDict['http'] = _proxy['host']+':'+_proxy['port']
                                 _proxyDict['https'] = _proxy['host']+':'+_proxy['port']
                 except:
-                        print "Error reading configuration file {0}".format(_configfile)
+                        print("Error reading configuration file {0}".format(_configfile))
                         sys.exit(1)
         else:
                 try:
-                        print '%s file was not found!' % _configfile
-                        config = ConfigParser.RawConfigParser()
+                        print('%s file was not found!' % _configfile)
+                        config = configparser.RawConfigParser()
                         config.add_section('TRAKT')
                         config.set('TRAKT', 'CLIENT_ID', '')
                         config.set('TRAKT', 'CLIENT_SECRET', '')
@@ -129,9 +129,9 @@ def read_config(options):
                         config.set('SETTINGS', 'PROXY_PORT', '3128')
                         with open(_configfile, 'wb') as configfile:
                                 config.write(configfile)
-                                print "Default settings wrote to file {0}".format(_configfile)
+                                print("Default settings wrote to file {0}".format(_configfile))
                 except:
-                        print "Error writing configuration file {0}".format(_configfile)
+                        print("Error writing configuration file {0}".format(_configfile))
                 sys.exit(1)
 
 def read_csv(options):
@@ -142,10 +142,10 @@ def read_csv(options):
 def api_auth(options):
         """API call for authentification OAUTH"""
         print("Open the link in a browser and paste the pincode when prompted")
-        print("https://trakt.tv/oauth/authorize?response_type=code&"
+        print(("https://trakt.tv/oauth/authorize?response_type=code&"
               "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-                  _trakt["client_id"]))
-        pincode = str(raw_input('Input:'))
+                  _trakt["client_id"])))
+        pincode = str(input('Input:'))
         url = _trakt['baseurl'] + '/oauth/token'
         values = {
             "code": pincode,
@@ -159,7 +159,7 @@ def api_auth(options):
         response = request.json()
         _headers['Authorization'] = 'Bearer ' + response["access_token"]
         _headers['trakt-api-key'] = _trakt['client_id']
-        print 'Save as "oauth_token" in file {0}: {1}'.format(options.config, response["access_token"])
+        print('Save as "oauth_token" in file {0}: {1}'.format(options.config, response["access_token"]))
 
 def api_search_by_id(options, id):
         """API call for Search / ID Lookup / Get ID lookup results"""
@@ -171,7 +171,7 @@ def api_search_by_id(options, id):
         else:
             r = requests.get(url, headers=_headers, timeout=(5, 60))
         if r.status_code != 200:
-            print "Error Get ID lookup results: {0} [{1}]".format(r.status_code, r.text)
+            print("Error Get ID lookup results: {0} [{1}]".format(r.status_code, r.text))
             return None
         else:
             return json.loads(r.text)
@@ -188,15 +188,15 @@ def api_get_list(options, page):
             r = requests.get(url, headers=_headers, timeout=(5, 60))
         #pp.pprint(r.headers)
         if r.status_code != 200:
-            print "Error fetching Get {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error fetching Get {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
-            print "Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list)
+            print("Fetched page {page} of {PageCount} pages for {list} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_list(options, page+1)
 
@@ -213,15 +213,15 @@ def api_add_to_list(options, import_data):
             values = { options.type : import_data }
         json_data = json.dumps(values)
         if options.verbose:
-            print "Sending to URL: {0}".format(url)
+            print("Sending to URL: {0}".format(url))
             pp.pprint(json_data)
         if _proxy['proxy']:
             r = requests.post(url, data=json_data, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
         else:
             r = requests.post(url, data=json_data, headers=_headers, timeout=(5, 60))
         if r.status_code != 201:
-            print "Error Adding items to {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error Adding items to {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             return json.loads(r.text)
@@ -242,8 +242,8 @@ def api_remove_from_list(options, remove_data):
         else:
             r = requests.post(url, data=json_data, headers=_headers, timeout=(5, 60))
         if r.status_code != 200:
-            print "Error removing items from {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text)
+            print("Error removing items from {list}: {status} [{text}]".format(
+                    list=options.list, status=r.status_code, text=r.text))
             return None
         else:
             return json.loads(r.text)
@@ -252,10 +252,10 @@ def cleanup_list(options):
         """Empty list prior to import"""
         export_data = api_get_list(options, 1)
         if export_data:
-            print "Found {0} Item-Count".format(len(export_data))
+            print("Found {0} Item-Count".format(len(export_data)))
         else:
-            print "Error, Cleanup no item return for {type} from the {list} list".format(
-                type=options.type, list=options.list)
+            print("Error, Cleanup no item return for {type} from the {list} list".format(
+                type=options.type, list=options.list))
             sys.exit(1)
         results = {'sentids' : 0, 'deleted' : 0, 'not_found' : 0}
         to_remove = []
@@ -265,7 +265,7 @@ def cleanup_list(options):
                 results['sentids'] += len(to_remove)
                 result = api_remove_from_list(options, to_remove)
                 if result:
-                    print "Result: {0}".format(result)
+                    print("Result: {0}".format(result))
                     if 'deleted' in result and result['deleted']:
                         results['deleted'] += result['deleted'][options.type]
                     if 'not_found' in result and result['not_found']:
@@ -277,13 +277,13 @@ def cleanup_list(options):
             results['sentids'] += len(to_remove)
             result = api_remove_from_list(options, to_remove)
             if result:
-                print "Result: {0}".format(result)
+                print("Result: {0}".format(result))
                 if 'deleted' in result and result['deleted']:
                     results['deleted'] += result['deleted'][options.type]
                 if 'not_found' in result and result['not_found']:
                     results['not_found'] += len(result['not_found'][options.type])
-        print "Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
-            sent=results['sentids'], type=options.type, deleted=results['deleted'], not_found=results['not_found'])
+        print("Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
+            sent=results['sentids'], type=options.type, deleted=results['deleted'], not_found=results['not_found']))
 
 def main():
         """
@@ -295,7 +295,8 @@ def main():
         * Inject data into Trakt.tv
         """
         # Parse inputs if any
-        parser = argparse.ArgumentParser(version='%(prog)s 0.1', description=desc, epilog=epilog)
+        parser = argparse.ArgumentParser(description=desc, epilog=epilog)
+        parser.add_argument('-v', action='version', version='%(prog)s 0.1')
         parser.add_argument('-c', '--config',
                       help='allow to overwrite default config filename, default %(default)s',
                       action='store', type=str, dest='config', default='config.ini')
@@ -328,10 +329,10 @@ def main():
 
         # Display debug information
         if options.verbose:
-            print "Options: %s" % options
+            print("Options: %s" % options)
 
         if options.seen and options.list != "history":
-            print "Error, you can only mark seen {0} when adding into the history list".format(options.type)
+            print("Error, you can only mark seen {0} when adding into the history list".format(options.type))
             sys.exit(1)
 
         if options.seen:
@@ -352,8 +353,8 @@ def main():
 
         # Display debug information
         if options.verbose:
-            print "API Trakt: {}".format(_trakt)
-            print "Authorization header: {}".format(_headers['Authorization'])
+            print("API Trakt: {}".format(_trakt))
+            print("Authorization header: {}".format(_headers['Authorization']))
 
         # Empty list prior to import
         if options.clean:
@@ -366,7 +367,7 @@ def main():
         data = []
         results = {'sentids' : 0, 'added' : 0, 'existing' : 0, 'not_found' : 0}
         if read_ids:
-            print "Found {0} items to import".format(len(read_ids))
+            print("Found {0} items to import".format(len(read_ids)))
             for myid in read_ids:
                 if myid:
                     # if not "imdb" it must be a integer
@@ -386,7 +387,7 @@ def main():
                         results['sentids'] += len(data)
                         result = api_add_to_list(options, data)
                         if result:
-                            print "Result: {0}".format(result)
+                            print("Result: {0}".format(result))
                             if 'added' in result and result['added']:
                                 results['added'] += result['added'][options.type]
                             if 'existing' in result and result['existing']:
@@ -400,7 +401,7 @@ def main():
                 results['sentids'] += len(data)
                 result = api_add_to_list(options, data)
                 if result:
-                    print "Result: {0}".format(result)
+                    print("Result: {0}".format(result))
                     if 'added' in result and result['added']:
                         results['added'] += result['added'][options.type]
                     if 'existing' in result and result['existing']:
@@ -409,12 +410,12 @@ def main():
                         results['not_found'] += len(result['not_found'][options.type])
         else:
             # TODO Read STDIN to ID
-            print "No items found, nothing to do."
+            print("No items found, nothing to do.")
             sys.exit(0)
 
-        print "Overall imported {sent} {type}, results added:{added}, existing:{existing}, not_found:{not_found}".format(
+        print("Overall imported {sent} {type}, results added:{added}, existing:{existing}, not_found:{not_found}".format(
                 sent=results['sentids'], type=options.type, added=results['added'], 
-                existing=results['existing'], not_found=results['not_found'])
+                existing=results['existing'], not_found=results['not_found']))
 
 if __name__ == '__main__':
         main()

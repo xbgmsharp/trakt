@@ -8,14 +8,14 @@
 
 ## Requirements
 
-You must use Python 2.7.x.
+You must use Python 3.x.
 
 ##### On Ubuntu/Debian Linux system
 
-Ensure you are running Python 2.7
+Ensure you are running Python 3
 ```
 $ python -V
-Python 2.7.9
+Python 3.5
 ```
 
 Install need module dependencies
@@ -26,18 +26,18 @@ $ apt-get install python-dateutil python-simplejson python-requests python-opens
 
 ##### On Windows system
 
- Download the installer: https://www.python.org/ftp/python/2.7.11/python-2.7.11.msi
+ Download the installer: https://www.python.org/downloads/windows/
 
- Ensure you are running Python 2.7
+ Ensure you are running Python 3
 ```
-C:\Python27>python.exe -V
-Python 2.7.11
+<python dir>>python.exe -V
+Python 3.5
 ```
 
  Install need module dependencies
 
 ```
-C:\Python2.7\Scripts\easy_install-2.7.exe simplejson requests tmdbsimple
+<python dir>\Scripts\pip3.exe install requests simplejson tmdbsimple
 ```
 
 ## Usage
