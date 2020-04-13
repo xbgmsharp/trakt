@@ -10,7 +10,7 @@
 
 You must use Python 3.x.
 
-##### On Ubuntu/Debian Linux system
+### On Ubuntu/Debian Linux system
 
 Ensure you are running Python 3
 ```
@@ -21,10 +21,10 @@ Python 3.5
 Install need module dependencies
 
 ```
-$ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+$ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 ```
 
-##### On Windows system
+### On Windows system
 
  Download the installer: https://www.python.org/downloads/windows/
 
@@ -91,6 +91,9 @@ Export Movies IDs from CouchPotato into CSV file format.
 ## Support
 
 To get support, please create new [issue](https://github.com/xbgmsharp/trakt/issues)
+
+## Contribution
+I'm happy to accept Pull Requests! 
 
 ## Licence
 
