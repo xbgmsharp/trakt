@@ -21,7 +21,7 @@ Python 3.5
 Install need module dependencies
 
 ```
-$ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+$ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 ```
 
 ##### On Windows system
@@ -119,6 +119,8 @@ optional arguments:
                         config.ini
   -i [INPUT], --input [INPUT]
                         CSV file to import, default None
+  -w, --watched_at      import watched_at date from CSV, it's must be UTC
+                        datetime, default False
   -f {imdb,tmdb,tvdb,tvrage,trakt}, --format {imdb,tmdb,tvdb,tvrage,trakt}
                         allow to overwrite default ID type format, default
                         imdb
@@ -152,9 +154,17 @@ Import all movies with imdb id from file ``movies_views.csv`` into history and m
 
 	$ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -s
 
+Import all movies with imdb id from file ``movies_views.csv`` into history and mark as watched using watched_at date in CSV
+
+	$ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -w
+
 Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen on 1 January 2014
 
 	$ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -s 2014-01-01T00:00:00.000Z
+
+Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as watched using watched_at date in CSV
+
+	$ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -w
 
 #### Movies to add watchlist
 No header line.

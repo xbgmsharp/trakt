@@ -21,7 +21,7 @@ Python 3.5
 Install need module dependencies
 
 ```
-$ apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+$ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 ```
 
 ##### On Windows system
