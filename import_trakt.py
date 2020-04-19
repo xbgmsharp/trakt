@@ -207,10 +207,14 @@ def api_add_to_list(options, import_data):
         url = _trakt['baseurl'] + '/sync/{list}'.format(list=options.list)
         #values = '{ "movies": [ { "ids": { "imdb": "tt0000111" } }, { "ids": { , "imdb": "tt1502712" } } ] }'
         #values = '{ "movies": [ { "watched_at": "2014-01-01T00:00:00.000Z", "ids": { "imdb": "tt0000111" } }, { "watched_at": "2013-01-01T00:00:00.000Z", "ids": { "imdb": "tt1502712" } } ] }'
+        '''
         if options.type == 'episodes':
+            #print(import_data)
             values = { 'shows' : import_data }
         else:
             values = { options.type : import_data }
+        '''
+        values = { options.type : import_data }
         json_data = json.dumps(values)
         if options.verbose:
             print("Sending to URL: {0}".format(url))
@@ -229,10 +233,13 @@ def api_add_to_list(options, import_data):
 def api_remove_from_list(options, remove_data):
         """API call for Sync / Remove from list"""
         url = _trakt['baseurl'] + '/sync/{list}/remove'.format(list=options.list)
+        '''
         if options.type == 'episodes':
             values = { 'shows' : remove_data }
         else:
             values = { options.type : remove_data }
+        '''
+        values = { options.type : remove_data }
         json_data = json.dumps(values)
         if options.verbose:
             print(url)
@@ -305,7 +312,7 @@ def main():
                       nargs='?', type=argparse.FileType('r'), default=None, required=True)
         parser.add_argument('-f', '--format',
                       help='allow to overwrite default ID type format, default %(default)s',
-                      choices=['imdb', 'tmdb', 'tvdb', 'tvrage', 'trakt'], dest='format', default='imdb')
+                      choices=['imdb', 'tmdb', 'tvdb', 'tvrage', 'trakt'], dest='format', default='trakt')
         parser.add_argument('-t', '--type',
                       help='allow to overwrite type, default %(default)s',
                       choices=['movies', 'shows', 'episodes'], dest='type', default='movies')
@@ -371,19 +378,27 @@ def main():
             for myid in read_ids:
                 if myid:
                     # if not "imdb" it must be a integer
-                    if not options.format == "imdb" and not myid[0].startswith('tt'):
-                        myid[0] = int(myid[0])
+                    #print(myid)
+                    #if not options.format == "imdb" and not myid[0].startswith('tt'):
+                        #myid[0] = int(myid[0])
                     if (options.type == "movies" or options.type == "shows") and options.seen:
-                        data.append({'ids':{options.format : myid[0]}, "watched_at": options.seen})
+                        #data.append({'ids':{options.format : myid[0]}, "watched_at": options.seen})
+                        if (myid[1] != "trakt_id"):
+                            data.append({'ids':{options.format : int(float(myid[1]))}, "watched_at": myid[2]})
+                        else:
+                            data.append({'ids':{options.format : myid[1]}, "watched_at": myid[2]})
                     elif options.type == "episodes" and options.seen and myid[1] and myid[2]:
-                        data.append({'ids':{options.format : myid[0]}, 
-                            "seasons": [ { "number": int(myid[1]), "episodes" : 
-                            [ { "number": int(myid[2]), "watched_at": options.seen} ] } ] })
+                        if (myid[1] != "trakt_id"):
+                            #data.append({'ids':{options.format : int(float(myid[1]))},"seasons": [ { "number": int(myid[3]), "episodes" :[ { "number": int(myid[4]), "watched_at": myid[2]} ] } ] })
+                            data.append({'season': int(myid[3]),"number": int(myid[4]), "ids": {options.format : int(float(myid[1]))},"watched_at": myid[2]})
+                        #else:
+                            #data.append({'ids':{options.format : myid[1]},"seasons": [ { "number": (myid[3]), "episodes" :[ { "number": (myid[4]), "watched_at": myid[2]} ] } ] })
                     else:
                         data.append({'ids':{options.format : myid[0]}})
                     # Import batch of 10 IDs
+                    #print(data)
                     if len(data) >= 10:
-                        #print pp.pprint(json.dumps(data))
+                        #print(json.dumps(data))
                         results['sentids'] += len(data)
                         result = api_add_to_list(options, data)
                         if result:
@@ -414,7 +429,7 @@ def main():
             sys.exit(0)
 
         print("Overall imported {sent} {type}, results added:{added}, existing:{existing}, not_found:{not_found}".format(
-                sent=results['sentids'], type=options.type, added=results['added'], 
+                sent=results['sentids'], type=options.type, added=results['added'],
                 existing=results['existing'], not_found=results['not_found']))
 
 if __name__ == '__main__':
