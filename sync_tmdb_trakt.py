@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2020 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Sync TMDB discovery into a Trakt.tv list
@@ -48,7 +48,7 @@ _trakt = {
 
 _tmdb = {
         'apikey'     :       '', # Auth details for TMDB API key
-        'filter'     :       '', # Auth details for TMDB discover filter        
+        'filter'     :       '', # Auth details for TMDB discover filter
 }
 
 _headers = {
@@ -152,7 +152,7 @@ def read_config(args):
                         config.set('SETTINGS', 'PROXY', False)
                         config.set('SETTINGS', 'PROXY_HOST', 'https://127.0.0.1')
                         config.set('SETTINGS', 'PROXY_PORT', '3128')
-                        with open(_configfile, 'wb') as configfile:
+                        with open(_configfile, 'w') as configfile:
                                 config.write(configfile)
                                 print("Default settings wrote to file {0}".format(_configfile))
                 except:

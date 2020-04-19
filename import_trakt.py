@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016-2018 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2020 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Import Movies or TVShows IDs into Trakt.tv
@@ -127,7 +127,7 @@ def read_config(options):
                         config.set('SETTINGS', 'PROXY', False)
                         config.set('SETTINGS', 'PROXY_HOST', 'https://127.0.0.1')
                         config.set('SETTINGS', 'PROXY_PORT', '3128')
-                        with open(_configfile, 'wb') as configfile:
+                        with open(_configfile, 'w') as configfile:
                                 config.write(configfile)
                                 print("Default settings wrote to file {0}".format(_configfile))
                 except:
