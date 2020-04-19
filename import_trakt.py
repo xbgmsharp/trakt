@@ -273,7 +273,7 @@ def cleanup_list(options):
                 to_remove = []
         # Remove the rest
         if len(to_remove) > 0:
-            #print pp.pprint(data)
+            #pp.pprint(data)
             results['sentids'] += len(to_remove)
             result = api_remove_from_list(options, to_remove)
             if result:
@@ -303,6 +303,9 @@ def main():
         parser.add_argument('-i', '--input',
                       help='CSV file to import, default %(default)s',
                       nargs='?', type=argparse.FileType('r'), default=None, required=True)
+        parser.add_argument('-w', '--watched_at',
+                      help='import watched_at date from CSV, it\'s must be UTC datetime, default %(default)s',
+                      default=False, action='store_true', dest='watched_at')
         parser.add_argument('-f', '--format',
                       help='allow to overwrite default ID type format, default %(default)s',
                       choices=['imdb', 'tmdb', 'tvdb', 'tvrage', 'trakt'], dest='format', default='imdb')
@@ -371,19 +374,26 @@ def main():
             for myid in read_ids:
                 if myid:
                     # if not "imdb" it must be a integer
+                    #pp.pprint(myid)
                     if not options.format == "imdb" and not myid[0].startswith('tt'):
                         myid[0] = int(myid[0])
                     if (options.type == "movies" or options.type == "shows") and options.seen:
                         data.append({'ids':{options.format : myid[0]}, "watched_at": options.seen})
+                    elif (options.type == "movies" or options.type == "shows") and options.watched_at:
+                        data.append({'ids':{options.format : myid[0]}, "watched_at": myid[1]})
                     elif options.type == "episodes" and options.seen and myid[1] and myid[2]:
-                        data.append({'ids':{options.format : myid[0]}, 
-                            "seasons": [ { "number": int(myid[1]), "episodes" : 
+                        data.append({'ids':{options.format : myid[0]},
+                            "seasons": [ { "number": int(myid[1]), "episodes" :
                             [ { "number": int(myid[2]), "watched_at": options.seen} ] } ] })
+                    elif options.type == "episodes" and options.watched_at and myid[1] and myid[2] and myid[3]:
+                        data.append({'ids':{options.format : myid[0]},
+                            "seasons": [ { "number": int(myid[1]), "episodes" :
+                            [ { "number": int(myid[2]), "watched_at": myid[3] } ] } ] })
                     else:
                         data.append({'ids':{options.format : myid[0]}})
                     # Import batch of 10 IDs
                     if len(data) >= 10:
-                        #print pp.pprint(json.dumps(data))
+                        #pp.pprint(json.dumps(data))
                         results['sentids'] += len(data)
                         result = api_add_to_list(options, data)
                         if result:
@@ -397,7 +407,7 @@ def main():
                         data = []
             # Import the rest
             if len(data) > 0:
-                #print pp.pprint(data)
+                #pp.pprint(data)
                 results['sentids'] += len(data)
                 result = api_add_to_list(options, data)
                 if result:
