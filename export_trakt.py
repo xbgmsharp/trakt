@@ -139,7 +139,7 @@ def write_csv(options, results):
         if options.verbose:
                 print("CSV output file: {0}".format(options.output))
         # Write result CSV
-        with open(options.output, 'w') as fp:
+        with open(options.output, 'w', encoding = 'utf-8') as fp:
                 keys = {}
                 for i in results:
                     for k in list(i.keys()):
