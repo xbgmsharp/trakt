@@ -135,9 +135,9 @@ Read a list from Trakt API. Export them into a CSV file.
 ## Examples
 ### Sample export usage
 
-Export all movies from wathclist:
+Export all movies from watchlist:
 
-	$ ./export_trakt.py -c config.ini -t movies -o export_movies_wathclist.csv -l watchlist
+	$ ./export_trakt.py -c config.ini -t movies -o export_movies_watchlist.csv -l watchlist
 
 Export all tvshows from the history list:
 
