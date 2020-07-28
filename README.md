@@ -40,6 +40,41 @@ Python 3.5
 <python dir>\Scripts\pip3.exe install requests simplejson
 ```
 
+### On macOS system
+
+ Download the installer: https://www.python.org/downloads/mac-osx/
+
+Append to PATH in ZSH
+
+```shell
+$ path=('/Library/Frameworks/Python.framework/Versions/3.8/bin' $path)
+```
+
+Ensure you are running Python 3
+
+```shell
+$ python3 -V
+Python 3.8.5
+```
+
+Run Install Certificates.command
+
+```shell
+$ pip3 install certifi
+```
+
+Open a new Terminal session so that certificates will be available
+
+Install need module dependencies
+
+```shell
+$ pip3 install python-dateutil
+$ pip3 install simplejson
+$ pip3 install requests
+$ pip3 install pyopenssl
+$ pip3 install jq
+```
+
 ## Usage
 
 * Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications.

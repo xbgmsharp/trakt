@@ -10,35 +10,7 @@
 
 You must use Python 3.x.
 
-##### On Ubuntu/Debian Linux system
-
-Ensure you are running Python 3
-```
-$ python -V
-Python 3.5
-```
-
-Install need module dependencies
-
-```
-$ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
-```
-
-##### On Windows system
-
- Download the installer: https://www.python.org/downloads/windows/
-
- Ensure you are running Python 3
-```
-<python dir>>python.exe -V
-Python 3.5
-```
-
- Install need module dependencies
-
-```
-<python dir>\Scripts\pip3.exe install requests simplejson
-```
+Refer to README.md for details.
 
 ## Usage
 
