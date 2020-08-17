@@ -24,6 +24,14 @@ Install need module dependencies
 $ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 ```
 
+### On Arch/Manjaro Linux system
+
+Install dependencies with pacman
+
+```
+$ pacman -S python python-dateutil python-simplejson python-requests python-pyopenssl jq 
+```
+
 ### On Windows system
 
  Download the installer: https://www.python.org/downloads/windows/
