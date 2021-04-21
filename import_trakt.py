@@ -383,9 +383,10 @@ def main():
             print("Found {0} items to import".format(len(read_ids)))
 
             for myid in read_ids:
+                # If id (row) exists and is not blank (has a format)
                 if myid and myid[options.format]:
-                    # if not "imdb" it must be a integer
                     #pp.pprint(myid)
+                    # If format is not "imdb" it must be cast to an integer
                     if not options.format == "imdb" and not myid[options.format].startswith('tt'):
                         myid[options.format] = int(myid[options.format])
                     if (options.type == "movies" or options.type == "shows") and options.seen:
