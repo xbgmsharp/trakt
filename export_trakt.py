@@ -138,16 +138,12 @@ def write_csv(options, results):
         """Write list output into a CSV file format"""
         if options.verbose:
                 print("CSV output file: {0}".format(options.output))
-        # Write result CSV
-        with open(options.output, 'w', encoding = 'utf-8') as fp:
-                keys = {}
-                for i in results:
-                    for k in list(i.keys()):
-                        keys[k] = 1
-                mycsv = csv.DictWriter(fp, fieldnames=list(keys.keys()), quoting=csv.QUOTE_ALL)
+        # Write result CSV, works with windows now
+        with open(options.output, 'w', encoding = 'utf-8', newline='') as fp:
+                mycsv = csv.DictWriter(fp, fieldnames=list(results[0].keys()), quoting=csv.QUOTE_ALL)
                 mycsv.writeheader()
                 for row in results:
-                        mycsv.writerow(row)
+                    mycsv.writerow(row)
         fp.close()
 
 def api_auth(options):
@@ -346,7 +342,7 @@ def main():
             print("trakt: {}".format(_trakt))
             print("Authorization header: {}".format(_headers['Authorization']))
 
-        ## Get lits from Trakt user
+        ## Get lists from Trakt user
         export_data = []
         if options.userlist:
             export_data = api_get_userlists(options, 1)
@@ -391,24 +387,26 @@ def main():
         export_csv = []
         find_dupids = []
         for data in export_data:
-           #pp.pprint(data)
-           if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
+            #pp.pprint(data)
+            # If movie or show 
+            if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
-                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
+                                    'trakt' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'title' : data[options.type[:-1]]['title']})
-           elif 'tmdb' in data[options.type[:-1]]['ids']:
+            # If episode
+            elif 'tmdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 if not data['episode']['title']: data['episode']['title'] = "no episode title"
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
-                                    'trakt_id' : data[options.type[:-1]]['ids']['trakt'],
+                                    'trakt' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'season' : data[options.type[:-1]]['season'],
                                     'episode' : data[options.type[:-1]]['number'],
                                     'episode_title' : data['episode']['title'],
                                     'show_title' : data['show']['title']})
-        #print export_csv
+        # print(export_csv)
         ## Write export data into CSV file
         write_csv(options, export_csv)
 
@@ -445,7 +443,7 @@ def main():
                 sent=cleanup_results['sentids'], type=options.type, 
                 deleted=cleanup_results['deleted'], not_found=cleanup_results['not_found']))
 
-        ## Found duplicate and remove duplicate
+        ## Find duplicate and remove duplicate
         dup_ids = [item for item, count in list(collections.Counter(find_dupids).items()) if count > 1]
         print("Found {dups} duplicate out of {total} {entry}".format(
                     entry=options.type, dups=len(dup_ids), total=len(find_dupids)))
