@@ -171,7 +171,13 @@ def api_auth(options):
         response = request.json()
         _headers['Authorization'] = 'Bearer ' + response["access_token"]
         _headers['trakt-api-key'] = _trakt['client_id']
-        print('Save as "oauth_token" in file {0}: {1}'.format(options.config, response["access_token"]))
+        config = _trakt['config_parser']
+        config.set('TRAKT', 'ACCESS_TOKEN', response["access_token"])
+        config.set('TRAKT', 'REFRESH_TOKEN', response["refresh_token"])
+        with open(options.config, 'w') as configfile:
+            config.write(configfile)
+            print('Saved as "access_token" in file {0}: {1}'.format(options.config, response["access_token"]))
+            print('Saved as "refresh_token" in file {0}: {1}'.format(options.config, response["refresh_token"]))
 
 def api_search_by_id(options, id):
         """API call for Search / ID Lookup / Get ID lookup results"""
