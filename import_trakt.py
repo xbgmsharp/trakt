@@ -22,6 +22,8 @@ try:
         import requests
         requests.packages.urllib3.disable_warnings()
         import csv
+        #from ratelimit import limits
+        import time
 except:
         sys.exit("Please use your favorite method to install the following module requests and simplejson to use this script")
 
@@ -148,7 +150,7 @@ def read_config(options):
 
 def read_csv(options):
         """Read CSV of Movies or TVShows IDs and return a dict"""
-        reader = csv.reader(options.input, delimiter=',')
+        reader = csv.DictReader(options.input, delimiter=',')
         return list(reader)
 
 def api_auth(options):
@@ -214,23 +216,31 @@ def api_get_list(options, page):
 
         return response_arr
 
+# @limits(calls=1, period=1)
 def api_add_to_list(options, import_data):
         """API call for Sync / Add items to list"""
+        
+        # Rate limit for API 
+        time.sleep(1)
         url = _trakt['baseurl'] + '/sync/{list}'.format(list=options.list)
         #values = '{ "movies": [ { "ids": { "imdb": "tt0000111" } }, { "ids": { , "imdb": "tt1502712" } } ] }'
         #values = '{ "movies": [ { "watched_at": "2014-01-01T00:00:00.000Z", "ids": { "imdb": "tt0000111" } }, { "watched_at": "2013-01-01T00:00:00.000Z", "ids": { "imdb": "tt1502712" } } ] }'
         if options.type == 'episodes':
-            values = { 'shows' : import_data }
+            values = { 'episodes' : import_data }
         else:
             values = { options.type : import_data }
+
         json_data = json.dumps(values)
         if options.verbose:
             print("Sending to URL: {0}".format(url))
             pp.pprint(json_data)
+
         if _proxy['proxy']:
+            #print(url)
             r = requests.post(url, data=json_data, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
         else:
             r = requests.post(url, data=json_data, headers=_headers, timeout=(5, 60))
+
         if r.status_code != 201:
             print("Error Adding items to {list}: {status} [{text}]".format(
                     list=options.list, status=r.status_code, text=r.text))
@@ -409,26 +419,24 @@ def main():
         results = {'sentids' : 0, 'added' : 0, 'existing' : 0, 'not_found' : 0}
         if read_ids:
             print("Found {0} items to import".format(len(read_ids)))
+
             for myid in read_ids:
-                if myid:
-                    # if not "imdb" it must be a integer
+                # If id (row) exists and is not blank (has a format)
+                if myid and myid[options.format]:
                     #pp.pprint(myid)
-                    if not options.format == "imdb" and not myid[0].startswith('tt'):
-                        myid[0] = int(myid[0])
+                    # If format is not "imdb" it must be cast to an integer
+                    if not options.format == "imdb" and not myid[options.format].startswith('tt'):
+                        myid[options.format] = int(myid[options.format])
                     if (options.type == "movies" or options.type == "shows") and options.seen:
-                        data.append({'ids':{options.format : myid[0]}, "watched_at": options.seen})
+                        data.append({'ids':{options.format : myid[options.format]}, "watched_at": options.seen})
                     elif (options.type == "movies" or options.type == "shows") and options.watched_at:
-                        data.append({'ids':{options.format : myid[0]}, "watched_at": myid[1]})
-                    elif options.type == "episodes" and options.seen and myid[1] and myid[2]:
-                        data.append({'ids':{options.format : myid[0]},
-                            "seasons": [ { "number": int(myid[1]), "episodes" :
-                            [ { "number": int(myid[2]), "watched_at": options.seen} ] } ] })
-                    elif options.type == "episodes" and options.watched_at and myid[1] and myid[2] and myid[3]:
-                        data.append({'ids':{options.format : myid[0]},
-                            "seasons": [ { "number": int(myid[1]), "episodes" :
-                            [ { "number": int(myid[2]), "watched_at": myid[3] } ] } ] })
+                        data.append({'ids':{options.format : myid[options.format]}, "watched_at": myid["watched_at"]})
+                    elif options.type == "episodes" and options.seen:
+                        data.append({'ids':{options.format : myid[options.format]},"watched_at": options.seen})
+                    elif options.type == "episodes" and options.watched_at:
+                        data.append({'ids':{options.format : myid[options.format]},"watched_at": myid["watched_at"]})
                     else:
-                        data.append({'ids':{options.format : myid[0]}})
+                        data.append({'ids':{options.format : myid[options.format]}})
                     # Import batch of 10 IDs
                     if len(data) >= 10:
                         #pp.pprint(json.dumps(data))
