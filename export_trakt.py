@@ -204,6 +204,10 @@ def api_get_list(options, page):
         else:
             global response_arr
             response_arr += json.loads(r.text)
+        if int(r.headers['X-Pagination-Page-Count']) == 0: 
+            print("No pages found after API call, trakt list may be empty")
+            return response_arr
+        # if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count'] != "0":
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
             print("Fetched page {page} of {PageCount} pages for {list} list".format(
                     page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
