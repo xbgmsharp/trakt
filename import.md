@@ -139,26 +139,31 @@ Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into hi
 	$ ./import_trakt.py -c config.ini -f imdb -i episodes_views.csv -l history -t episodes -w
 
 #### Movies to add watchlist
-No header line.
+Header line as format must be one 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt'
+Other colums are ignored
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt' by line
 ```
+imdb
 tt22239XX
 tt11712XX
 tt12728XX
 ```
 
 #### TVShows to add to watchlist
-No header line.
+Header line as format must be one 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt'
+Other colums are ignored
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt' by line
 ```
+imdb
 tt04606XX
 tt12365XX
 ```
 
 #### Episodes as views to history
-No header line.
+Header line as format 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt'.
 One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt' with season and episode
 ```
+imdb
 tt04606XX,3,4
 ```
 
