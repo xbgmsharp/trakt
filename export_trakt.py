@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016-2020 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2021 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Export Movies or TVShows IDs from Trakt.tv
@@ -44,8 +44,8 @@ _trakt = {
         'access_token'  :       '', # Auth details for trakt API
         'refresh_token' :       '', # Auth details for trakt API
         'baseurl'       :       'https://api.trakt.tv', # Sandbox environment https://api-staging.trakt.tv,
-        'config_parser' :       '', # configparser.ConfigParser object 
-        'config_path'   :       '', # path of config file 
+        'config_parser' :       '', # configparser.ConfigParser object
+        'config_path'   :       '', # path of config file
 }
 
 _headers = {
@@ -87,8 +87,8 @@ def read_config(options):
                 _configfile = options.config
         if options.verbose:
                 print("Config file: {0}".format(_configfile))
-        # For recording configparser 
-        config = "" 
+        # For recording configparser
+        config = ""
         if os.path.exists(_configfile):
                 try:
                         config = configparser.ConfigParser()
@@ -143,7 +143,7 @@ def read_config(options):
                 except:
                         print("Error writing configuration file {0}".format(_configfile))
                 sys.exit(1)
-        _trakt['config_parser'] = config 
+        _trakt['config_parser'] = config
         _trakt['config_path'] = _configfile
 
 def write_csv(options, results):
@@ -196,7 +196,7 @@ def api_get_list(options, page):
             r = requests.get(url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
         else:
             r = requests.get(url, headers=_headers, timeout=(5, 60))
-        #pp.pprint(r.headers) 
+        #pp.pprint(r.headers)
         if r.status_code != 200:
             print("Error fetching Get {list}: {status} [{text}]".format(
                     list=options.list, status=r.status_code, text=r.text))
@@ -204,11 +204,11 @@ def api_get_list(options, page):
         else:
             global response_arr
             response_arr += json.loads(r.text)
-        if int(r.headers['X-Pagination-Page-Count']) == 0: 
+        if int(r.headers['X-Pagination-Page-Count']) == 0:
             print("No pages found after API call, trakt list may be empty")
             return response_arr
         # if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count'] != "0":
-        if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
+        if 'X-Pagination-Page-Count' in r.headers and r.headers['X-Pagination-Page-Count']:
             print("Fetched page {page} of {PageCount} pages for {list} list".format(
                     page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
@@ -236,7 +236,7 @@ def api_get_userlists(options, page):
         else:
             global response_arr
             response_arr += json.loads(r.text)
-        if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
+        if 'X-Pagination-Page-Count' in r.headers and r.headers['X-Pagination-Page-Count']:
             print("Fetched page {page} of {PageCount} pages for {list} list".format(
                     page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
@@ -262,7 +262,7 @@ def api_get_userlist(options, page):
         else:
             global response_arr
             response_arr += json.loads(r.text)
-        if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
+        if 'X-Pagination-Page-Count' in r.headers and r.headers['X-Pagination-Page-Count']:
             print("Fetched page {page} of {PageCount} pages for {list} list".format(
                     page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
             if page != int(r.headers['X-Pagination-Page-Count']):
@@ -353,7 +353,7 @@ def main():
         config = read_config(options)
 
         ## Try refreshing to get new access token. If it doesn't work, user needs to authenticate again.
-        if _trakt['refresh_token']: 
+        if _trakt['refresh_token']:
             values = {
                     "refresh_token": _trakt['refresh_token'],
                     "client_id": _trakt['client_id'],
@@ -365,7 +365,7 @@ def main():
             url = _trakt['baseurl'] + '/oauth/token'
             r = requests.post(url, data=values)
             print(r.status_code)
-            if r.status_code == 200: 
+            if r.status_code == 200:
                 response = r.json()
                 _trakt['access_token'] = response["access_token"]
                 _trakt['refresh_token'] = response["refresh_token"]
@@ -380,10 +380,10 @@ def main():
                     print('Saved as "refresh_token" in file {0}: {1}'.format(options.config, response["refresh_token"]))
             else:
                 print("Refreshing access_token failed. Get new refresh_token and access_token by manually authenticating again")
-                api_auth(options) 
-        else:   
+                api_auth(options)
+        else:
             print("No refresh_token found in config file. Get new refresh_token and access_token by manually authenticating again")
-            api_auth(options) 
+            api_auth(options)
 
         ## Display debug information
         if options.verbose:
@@ -436,7 +436,7 @@ def main():
         find_dupids = []
         for data in export_data:
             #pp.pprint(data)
-            # If movie or show 
+            # If movie or show
             if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
@@ -488,7 +488,7 @@ def main():
                     if 'not_found' in result and result['not_found']:
                         cleanup_results['not_found'] += len(result['not_found'][options.type])
             print("Overall cleanup {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
-                sent=cleanup_results['sentids'], type=options.type, 
+                sent=cleanup_results['sentids'], type=options.type,
                 deleted=cleanup_results['deleted'], not_found=cleanup_results['not_found']))
 
         ## Find duplicate and remove duplicate
@@ -531,7 +531,7 @@ def main():
                         dup_results['not_found'] += len(result['not_found'][options.type])
                     to_remove = []
             print("Overall {dup} duplicate {sent} {type}, results deleted:{deleted}, not_found:{not_found}".format(
-                dup=len(dup_ids), sent=dup_results['sentids'], type=options.type, 
+                dup=len(dup_ids), sent=dup_results['sentids'], type=options.type,
                 deleted=dup_results['deleted'], not_found=dup_results['not_found']))
 
 if __name__ == '__main__':
