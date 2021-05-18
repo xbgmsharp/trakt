@@ -1,7 +1,6 @@
 # trakt.tv import/export tools
 
 Python scripts that use the [Trakt API](https://trakt.docs.apiary.io/) to export movie and episodes from trakt lists to a csv file, and import them back to any Trakt account. 
-This project is essentially an updated version of the csv import/export functionality of [xbgmsharp/trakt](https://github.com/xbgmsharp/trakt).
 
 ## Installation 
 
