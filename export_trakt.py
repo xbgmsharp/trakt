@@ -198,6 +198,41 @@ def process_export_data(options, export_data):
         dup_ids = [item for item, count in list(collections.Counter(find_dupids).items()) if count > 1]
         print("Found {dups} duplicate(s) out of {total} {entry}(s)".format(
                     entry=options.type, dups=len(dup_ids), total=len(find_dupids)))
+        # print all duplicates
+        if options.verbose:
+            for dupid in find_dupids:
+                count = 0
+                for myid in export_data:
+                    if myid[options.type[:-1]]['ids']['trakt'] == dupid:
+                        #print "{0} {1}".format(dupid, data['id'])
+                        count += 1
+                        if count > 1:
+                            if 'watched_at' in myid: 
+                                options.csv_time = 'watched_at'
+                            elif 'listed_at' in myid:
+                                options.csv_time = 'listed_at'
+                            elif 'collected_at' in myid:
+                                options.csv_time = 'collected_at'
+                            else:
+                                options.csv_time = None
+                            #if options.verbose:
+                                #pp.pprint(myid)
+                            row_title = "" 
+                            row_time = "" 
+                            if options.csv_time: 
+                                row_time = myid[options.csv_time]
+                            # If format is not "imdb" it must be cast to an integer
+                            if (options.type == "movies" or options.type == "shows"):
+                                row_title = "title: " + myid[options.type[:-1]]['title']
+                            elif options.type == "episodes":
+                                row_title = "title: " + myid['show']['title'] + ", episode_title: " + myid['episode']['title']
+                            else:
+                                data.append({'ids':{'trakt' : myid['trakt']}})
+                            if options.csv_time:
+                                print("Duplicate record, {title}, id: {id}, {csv_time}: {time}".format(title=row_title, id=myid[options.type[:-1]]['ids']['trakt'], csv_time=options.csv_time, time=row_time))
+                            else:
+                                print("Duplciate record, {title}, id: {id}, no time recorded in csv file".format(title=row_title, id=myid[options.type[:-1]]['ids']['trakt']))
+
         if options.dup:
             if len(dup_ids) > 0:
                 print(dup_ids)

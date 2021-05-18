@@ -342,13 +342,15 @@ def main():
                         options.csv_time = 'listed_at'
                     elif 'collected_at' in myid:
                         options.csv_time = 'collected_at'
+                    else:
+                        options.csv_time = None
                     if options.verbose:
                         pp.pprint(myid)
                     row_title = "" 
                     row_time = "" 
                     if options.seen:
                         row_time = options.seen 
-                    else: 
+                    elif options.csv_time: 
                         row_time = myid[options.csv_time]
                     # If format is not "imdb" it must be cast to an integer
                     if not options.format == "imdb" and not myid[options.format].startswith('tt'):
@@ -361,7 +363,10 @@ def main():
                         data.append({'ids':{options.format : myid[options.format]}, options.time_key: row_time})
                     else:
                         data.append({'ids':{options.format : myid[options.format]}})
-                    print("Importing record, {title}, id: {id}, {csv_time}: {time}".format(title=row_title, id=myid[options.format], csv_time=options.csv_time, time=row_time))
+                    if options.csv_time:
+                        print("Importing record, {title}, id: {id}, {csv_time}: {time}".format(title=row_title, id=myid[options.format], csv_time=options.csv_time, time=row_time))
+                    else:
+                        print("Importing record, {title}, id: {id}, no time recorded in csv file".format(title=row_title, id=myid[options.format]))
                     # Import batch of 10 IDs
                     if len(data) >= 10:
                         #pp.pprint(json.dumps(data))
