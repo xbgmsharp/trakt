@@ -150,6 +150,10 @@ def write_csv(options, results):
         """Write list output into a CSV file format"""
         if options.verbose:
                 print("CSV output file: {0}".format(options.output))
+	# sort
+        if options.sortorder == 'asc':
+                sorted_results = sorted(results, key = lambda kv:(kv[options.time]))
+                results = sorted_results	
         # Write result CSV, works with windows now
         with open(options.output, 'w', encoding = 'utf-8', newline='') as fp:
                 mycsv = csv.DictWriter(fp, fieldnames=list(results[0].keys()), quoting=csv.QUOTE_ALL)
@@ -327,6 +331,9 @@ def main():
         parser.add_argument('-D', '--duplicate',
                       help='remove duplicate from list after export, default %(default)s',
                       default=False, action='store_true', dest='dup')
+        parser.add_argument('-s', '--sort',
+                      help='allow to overwrite sort order, default %(default)s',
+                      choices=['asc', 'desc'], dest='sortorder', default='desc')
         #parser.add_argument('-d', '--dryrun',
         #              help='do not update the account, default %(default)s',
         #              default=True, action='store_true', dest='dryrun')
