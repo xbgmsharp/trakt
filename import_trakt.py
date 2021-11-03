@@ -334,6 +334,9 @@ def main():
         parser.add_argument('-w', '--watched_at',
                       help='import watched_at date from CSV, it\'s must be UTC datetime, default %(default)s',
                       default=False, action='store_true', dest='watched_at')
+        parser.add_argument('-r', '--rated_at',
+                      help='import rated_at date from CSV, it\'s must be UTC datetime, default %(default)s',
+                      default=False, action='store_true', dest='rated_at')
         parser.add_argument('-f', '--format',
                       help='allow to overwrite default ID type format, default %(default)s',
                       choices=['imdb', 'tmdb', 'tvdb', 'tvrage', 'trakt'], dest='format', default='imdb')
@@ -342,7 +345,7 @@ def main():
                       choices=['movies', 'shows', 'episodes'], dest='type', default='movies')
         parser.add_argument('-l', '--list',
                       help='allow to overwrite default list, default %(default)s',
-                      choices=['watchlist', 'collection', 'history'], dest='list', default='watchlist')
+                      choices=['watchlist', 'collection', 'history', 'ratings'], dest='list', default='watchlist')
         parser.add_argument('-s', '--seen',
                       help='mark as seen, default %(default)s. Use specific time if provided, falback time: "2016-01-01T00:00:00.000Z"',
                       nargs='?', const='2016-01-01T00:00:00.000Z',
@@ -444,6 +447,8 @@ def main():
                         data.append({'ids':{options.format : myid[options.format]},"watched_at": options.seen})
                     elif options.type == "episodes" and options.watched_at:
                         data.append({'ids':{options.format : myid[options.format]},"watched_at": myid["watched_at"]})
+                    elif (options.type == "movies" or options.type == "shows") and options.list == 'ratings' and options.rated_at:
+                        data.append({'ids':{options.format : myid[options.format]}, "rated_at": myid["rated_at"], "rating": myid["rating"]})
                     else:
                         data.append({'ids':{options.format : myid[options.format]}})
                     # Import batch of 10 IDs

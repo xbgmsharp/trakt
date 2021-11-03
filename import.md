@@ -3,6 +3,7 @@
 ## Purpose
 
  * Import Movies or TVShows IDs from CSV file format into Trakt.tv.
+ * Import Ratings of Movies or TVShows IDs from CSV file format into Trakt.tv.
  * Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
  * Create trakt.tv custom list from TDMB discover with filter.
 
@@ -31,7 +32,7 @@ $ vim config.ini
 ```
 
 * Run the script to authenticate against Trakt.tv API using the PIN method and it will generate you an ``oauth_token``.
-You will be prompted to open a link into a browser and paste the pincode back to the script. 
+You will be prompted to open a link into a browser and paste the pincode back to the script.
 Make sure you save the generated ``oauth_token`` into the config file ``config.ini`` for later use.
 
 ```
@@ -71,14 +72,16 @@ $ pydoc `pwd`/import_trakt.py
 $ pydoc `pwd`/export_trakt.py
 ```
 
-## Usage 
+## Usage
 ### Import usage
 
 ```text
 usage: import_trakt.py [-h] [-v] [-c CONFIG] -i [INPUT]
                        [-f {imdb,tmdb,tvdb,tvrage,trakt}]
                        [-t {movies,shows,episodes}]
-                       [-l {watchlist,collection,history}] [-s [SEEN]] [-C]
+                       [-l {watchlist,collection,history,ratings}] [-s [SEEN]] [-C]
+                       [-w]
+                       [-r]
                        [-V]
 
 This program import Movies or TVShows IDs into Trakt.tv.
@@ -93,16 +96,18 @@ optional arguments:
                         CSV file to import, default None
   -w, --watched_at      import watched_at date from CSV, it's must be UTC
                         datetime, default False
+  -r, --rated_at        import rated_at date from CSV, it's must be UTC
+                        datetime, default False
   -f {imdb,tmdb,tvdb,tvrage,trakt}, --format {imdb,tmdb,tvdb,tvrage,trakt}
                         allow to overwrite default ID type format, default
                         imdb
   -t {movies,shows,episodes}, --type {movies,shows,episodes}
                         allow to overwrite type, default movies
-  -l {watchlist,collection,history}, --list {watchlist,collection,history}
+  -l {watchlist,collection,history,ratings}, --list {watchlist,collection,history,ratings}
                         allow to overwrite default list, default watchlist
   -s [SEEN], --seen [SEEN]
                         mark as seen, default False. Use specific time if
-                        provided, falback time: "2016-01-01T00:00:00.000Z"
+                        provided, fallback time: "2016-01-01T00:00:00.000Z"
   -C, --clean           empty list prior to import, default False
   -V, --verbose         print additional verbose information, default True
 
@@ -129,6 +134,14 @@ Import all movies with imdb id from file ``movies_views.csv`` into history and m
 Import all movies with imdb id from file ``movies_views.csv`` into history and mark as watched using watched_at date in CSV
 
 	$ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l history -t movies -w
+
+Import all ratings of movies with imdb id from file ``movies_rated.csv`` using rated_at date in CSV and rating (0-10) in CSV as rating
+
+	$ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l ratings -t movies -r
+
+Import all ratings of TVShows with imdb id from file ``shows_rated.csv`` using rated_at date in CSV and rating (0-10) in CSV as rating
+
+	$ ./import_trakt.py -c config.ini -f imdb -i movies_views.csv -l ratings -t shows -r
 
 Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into history and mark as seen on 1 January 2014
 
