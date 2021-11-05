@@ -10,6 +10,55 @@
 
 You must use Python 3.x.
 
+### On Docker
+
+To run [Docker hub image](https://hub.docker.com/r/xbgmsharp/docker-trakt-tools)
+```bash
+$ docker pull xbgmsharp/docker-trakt-tools
+$ docker run -it --rm --name my-trakt-tools xbgmsharp/docker-trakt-tools python export_trakt.py -v
+export_trakt.py 0.3
+```
+
+You might need to use the `--privileged` options on some case/
+```bash
+$ docker run --privileged -it --rm --name my-trakt-tools xbgmsharp/docker-trakt-tools python export_trakt.py -v
+export_trakt.py 0.3
+```
+
+Create and edit default config
+```bash
+$ docker run -it --rm \
+  --name my-trakt-tools \
+  -v $(pwd):/trakt/export \
+  -v $(pwd):/trakt/config \
+  xbgmsharp/docker-trakt-tools \
+  python export_trakt.py -c config/config.ini
+```
+
+Run export
+```bash
+$ docker run -it --rm \
+  --name my-trakt-tools \
+  -v $(pwd):/trakt/export \
+  -v $(pwd):/trakt/config \
+  xbgmsharp/docker-trakt-tools \
+  python export_trakt.py -c config/config.ini -o export/export_movies_history.csv
+```
+
+`my-trakt-tools` is the container name.
+
+`xbgmsharp/docker-trakt-tools` is the image name.
+
+To build the image
+```bash
+$ docker build -t xbgmsharp/docker-trakt-tools .
+```
+
+To build the multi-arch image
+```bash
+$ ./multi-arch-docker-ci.sh
+```
+
 ### On Ubuntu/Debian Linux system
 
 Ensure you are running Python 3
@@ -18,7 +67,7 @@ $ python -V
 Python 3.5
 ```
 
-Install need module dependencies
+Install need module dependencies, `python3-openssl` and `jq` are optional
 
 ```
 $ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
@@ -26,7 +75,7 @@ $ apt-get install python3-dateutil python3-simplejson python3-requests python3-o
 
 ### On Arch/Manjaro Linux system
 
-Install dependencies with pacman
+Install dependencies with pacman, `python-pyopenssl` and `jq` are optional
 
 ```
 $ pacman -S python python-dateutil python-simplejson python-requests python-pyopenssl jq 
@@ -34,15 +83,15 @@ $ pacman -S python python-dateutil python-simplejson python-requests python-pyop
 
 ### On Windows system
 
- Download the installer: https://www.python.org/downloads/windows/
+Download the installer: https://www.python.org/downloads/windows/
 
- Ensure you are running Python 3
+Ensure you are running Python 3
 ```
 <python dir>>python.exe -V
 Python 3.5
 ```
 
- Install need module dependencies
+Install need module dependencies
 
 ```
 <python dir>\Scripts\pip3.exe install requests simplejson
@@ -50,7 +99,7 @@ Python 3.5
 
 ### On macOS system
 
- Download the installer: https://www.python.org/downloads/mac-osx/
+Download the installer: https://www.python.org/downloads/mac-osx/
 
 Append to PATH in ZSH
 
@@ -73,7 +122,7 @@ $ pip3 install certifi
 
 Open a new Terminal session so that certificates will be available
 
-Install need module dependencies
+Install need module dependencies, `pyopenssl` and `jq` are optional
 
 ```shell
 $ pip3 install python-dateutil
