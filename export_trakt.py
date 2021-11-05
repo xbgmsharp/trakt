@@ -57,7 +57,7 @@ _trakt = {
 _headers = {
         'Accept'            : 'application/json',   # required per API
         'Content-Type'      : 'application/json',   # required per API
-        'User-Agent'        : 'Tratk importer',     # User-agent
+        'User-Agent'        : 'Trakt exporter',     # User-agent
         'Connection'        : 'Keep-Alive',         # Thanks to urllib3, keep-alive is 100% automatic within a session!
         'trakt-api-version' : '2',                  # required per API
         'trakt-api-key'     : '',                   # required per API
@@ -97,7 +97,7 @@ def read_config(options):
         config = ""
         if os.path.exists(_configfile):
                 try:
-                        config = configparser.ConfigParser()
+                        config = configparser.ConfigParser(os.environ)
                         config.read(_configfile)
                         if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
@@ -156,7 +156,7 @@ def write_csv(options, results):
         """Write list output into a CSV file format"""
         if options.verbose:
                 print("CSV output file: {0}".format(options.output))
-	# sort
+        # sort
         if options.sortorder == 'asc':
                 sorted_results = sorted(results, key = lambda kv:(kv[options.time]))
                 results = sorted_results	
@@ -322,6 +322,9 @@ def main():
         parser.add_argument('-o', '--output',
                       help='allow to overwrite default output filename, default %(default)s',
                       nargs='?', type=str, const='export.csv', default=None)
+        parser.add_argument('-f', '--format',
+                      help='allow to overwrite default ID type format, default %(default)s',
+                      choices=['imdb', 'tmdb', 'tvdb', 'tvrage', 'trakt'], dest='format', default='imdb')
         parser.add_argument('-t', '--type',
                       help='allow to overwrite type, default %(default)s',
                       choices=['movies', 'shows', 'episodes'], dest='type', default='movies')
@@ -449,18 +452,40 @@ def main():
         find_dupids = []
         for data in export_data:
             #pp.pprint(data)
-            # If movie or show
-            if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids']:
+            # If movie or show export by format imdb
+            if options.type[:-1] != "episode" and 'imdb' in data[options.type[:-1]]['ids'] and \
+                options.format == "imdb":
                 find_dupids.append(data[options.type[:-1]]['ids']['imdb'])
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
                                     'trakt' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'title' : data[options.type[:-1]]['title']})
-            # If episode
-            elif 'tmdb' in data[options.type[:-1]]['ids']:
+            # If movie or show export by format tmdb
+            elif options.type[:-1] != "episode" and 'tmdb' in data[options.type[:-1]]['ids'] and \
+                options.format == "tmdb":
+                find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
+                export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
+                                    'trakt' : data[options.type[:-1]]['ids']['trakt'],
+                                    options.time : data[options.time],
+                                    'title' : data[options.type[:-1]]['title']})
+            # If episode export by format tmdb
+            elif 'tmdb' in data[options.type[:-1]]['ids'] and \
+                options.format == "tmdb":
                 find_dupids.append(data[options.type[:-1]]['ids']['tmdb'])
                 if not data['episode']['title']: data['episode']['title'] = "no episode title"
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
+                                    'trakt' : data[options.type[:-1]]['ids']['trakt'],
+                                    options.time : data[options.time],
+                                    'season' : data[options.type[:-1]]['season'],
+                                    'episode' : data[options.type[:-1]]['number'],
+                                    'episode_title' : data['episode']['title'],
+                                    'show_title' : data['show']['title']})
+            # If episode export by format tvdb
+            elif 'tvdb' in data[options.type[:-1]]['ids'] and \
+                options.format == "tvdb":
+                find_dupids.append(data[options.type[:-1]]['ids']['tvdb'])
+                if not data['episode']['title']: data['episode']['title'] = "no episode title"
+                export_csv.append({ 'tvdb' : data[options.type[:-1]]['ids']['tvdb'],
                                     'trakt' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
                                     'season' : data[options.type[:-1]]['season'],

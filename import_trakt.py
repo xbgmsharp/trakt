@@ -59,7 +59,7 @@ _trakt = {
 _headers = {
         'Accept'            : 'application/json',   # required per API
         'Content-Type'      : 'application/json',   # required per API
-        'User-Agent'        : 'Tratk importer',     # User-agent
+        'User-Agent'        : 'Trakt importer',     # User-agent
         'Connection'        : 'Keep-Alive',         # Thanks to urllib3, keep-alive is 100% automatic within a session!
         'trakt-api-version' : '2',                  # required per API
         'trakt-api-key'     : '',                   # required per API
@@ -99,7 +99,7 @@ def read_config(options):
         config = ""
         if os.path.exists(_configfile):
                 try:
-                        config = configparser.ConfigParser()
+                        config = configparser.ConfigParser(os.environ)
                         config.read(_configfile)
                         if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
