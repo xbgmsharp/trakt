@@ -1,7 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016-2021 xbgmsharp <xbgmsharp@gmail.com>
+#------------------------------------------------------------------------
+# Trakt.tv tools
+#
+# Copyright 2016-2021 xbgmsharp <xbgmsharp@gmail.com>. All Rights Reserved.
+# License:  GNU General Public License version 3 or later; see LICENSE.txt
+# Website:  https://trakt.tv, https://github.com/xbgmsharp/trakt
+#------------------------------------------------------------------------
 #
 # Purpose:
 # Import Movies or TVShows IDs into Trakt.tv

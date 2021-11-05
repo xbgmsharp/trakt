@@ -1,3 +1,11 @@
+#!/bin/bash
+#------------------------------------------------------------------------
+# Trakt.tv tools
+#
+# Copyright 2016-2021 xbgmsharp <xbgmsharp@gmail.com>. All Rights Reserved.
+# License:  GNU General Public License version 3 or later; see LICENSE.txt
+# Website:  https://trakt.tv, https://github.com/xbgmsharp/trakt
+#------------------------------------------------------------------------
 
 ## Check ENV
 if [[ -z "${DOCKER_USERNAME}" ]]; then
