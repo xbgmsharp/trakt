@@ -201,7 +201,8 @@ proxy_port = 3128
 
  * ``client_id``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
  * ``client_secret``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
- * ``oauth_token``: Uniq ID to identify yourself against your application
+ * ``access_token``: Uniq ID to identify yourself against your application, manage by the script
+ * ``refresh_token``: Uniq ID to identify yourself against your application, manage by the script
  * ``baseurl``: API base URL, depends on the platfrom, eg: Production (https://api-v2launch.trakt.tv) or Staging (https://api-staging.trakt.tv)
  * ``proxy``: True/False setting to enable proxy support
  * ``proxy_host``: Full URI of the proxy
