@@ -390,7 +390,7 @@ def main():
 
             url = _trakt['baseurl'] + '/oauth/token'
             r = requests.post(url, data=values)
-            print(r.status_code)
+            #print(r.status_code)
             if r.status_code == 200:
                 response = r.json()
                 _trakt['access_token'] = response["access_token"]
