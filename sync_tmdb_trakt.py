@@ -364,8 +364,9 @@ def main():
         * Reduce TMDB list to only my langauge fr, en, es and if need watched
         * Inject data into Trakt.tv
         """
-        # Parse inputs if any
-        parser = argparse.ArgumentParser(version='%(prog)s 0.1', description=desc, epilog=epilog)
+        ## Parse inputs if any
+        parser = argparse.ArgumentParser(description=desc, epilog=epilog)
+        parser.add_argument('-v', action='version', version='%(prog)s 0.3')
         parser.add_argument('-c', '--config',
                       help='allow to overwrite default config filename, default %(default)s',
                       action='store', type=str, dest='config', default='config.ini')
