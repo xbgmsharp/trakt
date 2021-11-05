@@ -1,8 +1,32 @@
-# Trakt.tv import/export tools
+# Trakt.tv tools
+
+- [Trakt.tv tools](#trakttv-tools)
+  * [Purpose](#purpose)
+  * [Requirements](#requirements)
+    + [On Docker](#on-docker)
+    + [On Ubuntu/Debian Linux system](#on-ubuntu-debian-linux-system)
+    + [On Arch/Manjaro Linux system](#on-arch-manjaro-linux-system)
+    + [On Windows system](#on-windows-system)
+    + [On macOS system](#on-macos-system)
+  * [Usage](#usage)
+  * [Configuration](#configuration)
+    + [Configuration sample](#configuration-sample)
+    + [Configuration details](#configuration-details)
+  * [Developer documentation](#developer-documentation)
+  * [Howto](#howto)
+    + [Import](#import)
+    + [Export](#export)
+    + [Sync](#sync)
+    + [Export data from Kodi](#export-data-from-kodi)
+    + [Export data from CouchPotato](#export-data-from-couchpotato)
+  * [Support](#support)
+  * [Contribution](#contribution)
+  * [Licence](#licence)
 
 ## Purpose
 
  * Import Movies or TVShows IDs from CSV file format into Trakt.tv.
+ * Import Ratings of Movies or TVShows IDs from CSV file format into Trakt.tv.
  * Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
  * Create trakt.tv custom list from TDMB discover with filter.
 
@@ -158,24 +182,60 @@ Make sure you save the generated ``oauth_token`` into the config file ``config.i
 $ python export_trakt.py
 ```
 
-## Import 
+## Configuration
+
+### Configuration sample
+
+```text
+[TRAKT]
+client_id = xxxxxxxxxxxxxxxxxxxxxxxxx
+client_secret = xxxxxxxxxxxxxxxxxxxxxx
+oauth_token = xxxxxxxxxxxxxxxxxxxxxxx
+baseurl = https://api-v2launch.trakt.tv
+[SETTINGS]
+proxy = False
+proxy_host = https://127.0.0.1
+proxy_port = 3128
+```
+
+### Configuration details
+
+ * ``client_id``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
+ * ``client_secret``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
+ * ``oauth_token``: Uniq ID to identify yourself against your application
+ * ``baseurl``: API base URL, depends on the platfrom, eg: Production (https://api-v2launch.trakt.tv) or Staging (https://api-staging.trakt.tv)
+ * ``proxy``: True/False setting to enable proxy support
+ * ``proxy_host``: Full URI of the proxy
+ * ``proxy_port``: Port of the proxy to connect to
+
+## Developer documentation
+
+```bash
+$ pydoc `pwd`/import_trakt.py
+$ pydoc `pwd`/export_trakt.py
+$ pydoc `pwd`/sync_tmdb_trakt.py
+```
+
+## Howto
+
+### Import 
 
 [Import CSV into trakt.tv](import.md)
 
-## Export
+### Export
 
 [Export data from trakt.tv into CSV](export.md)
 
-## Sync
+### Sync
 
 [Create trakt.tv list from TDMB discover with filter](sync.md)
 
-## Export data from Kodi
+### Export data from Kodi
 
 Export Movies or TVShows IDs from Kodi into CSV file format.
 [Export data from Kodi](KODI.md)
 
-## Export data from CouchPotato
+### Export data from CouchPotato
 
 Export Movies IDs from CouchPotato into CSV file format.
 [Export data from CouchPotato](CouchPotato.md)

@@ -1,76 +1,19 @@
-# Trakt.tv import/export tools
+# Trakt.tv tools
 
 ## Purpose
 
  * Import Movies or TVShows IDs from CSV file format into Trakt.tv.
  * Import Ratings of Movies or TVShows IDs from CSV file format into Trakt.tv.
- * Export Movies or TVShows IDs from Trakt.tv list into CSV file format.
- * Create trakt.tv custom list from TDMB discover with filter.
 
 ## Requirements
 
 You must use Python 3.x.
 
-Refer to README.md for details.
-
-## Usage
-
-* Create an [Trakt.tv application](https://trakt.tv/oauth/applications) to have your own ``client_id`` and ``client_secret``, https://trakt.tv/oauth/applications.
-You only need to fill up the ``Name`` with a ``Description`` and ``Redirect uri`` to `urn:ietf:wg:oauth:2.0:oob`, leave the rest empty and click on ``SAVE APP``.
-
-* Run the script to create a default config file ``config.ini``
-
-```
-$ python export_trakt.py
-```
-
-* Edit the config file ``config.ini`` and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: URL, proxy, etc...
-Refer to ``Configuration details`` section for more information.
-
-```
-$ vim config.ini
-```
-
-* Run the script to authenticate against Trakt.tv API using the PIN method and it will generate you an ``oauth_token``.
-You will be prompted to open a link into a browser and paste the pincode back to the script.
-Make sure you save the generated ``oauth_token`` into the config file ``config.ini`` for later use.
-
-```
-$ python export_trakt.py
-```
+Refer to [README.md](README.md#requirements) for details.
 
 ## Configuration
 
-#### Configuration sample
-
-```text
-[TRAKT]
-client_id = xxxxxxxxxxxxxxxxxxxxxxxxx
-client_secret = xxxxxxxxxxxxxxxxxxxxxx
-oauth_token = xxxxxxxxxxxxxxxxxxxxxxx
-baseurl = https://api-v2launch.trakt.tv
-[SETTINGS]
-proxy = False
-proxy_host = https://127.0.0.1
-proxy_port = 3128
-```
-
-#### Configuration details
-
- * ``client_id``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
- * ``client_secret``: Uniq ID to identify your application, https://trakt.tv/oauth/applications
- * ``oauth_token``: Uniq ID to identify yourself against your application
- * ``baseurl``: API base URL, depends on the platfrom, eg: Production (https://api-v2launch.trakt.tv) or Staging (https://api-staging.trakt.tv)
- * ``proxy``: True/False setting to enable proxy support
- * ``proxy_host``: Full URI of the proxy
- * ``proxy_port``: Port of the proxy to connect to
-
-## Developer documentation
-
-```
-$ pydoc `pwd`/import_trakt.py
-$ pydoc `pwd`/export_trakt.py
-```
+Refer to [README.md](README.md#configuration) for details.
 
 ## Usage
 ### Import usage
