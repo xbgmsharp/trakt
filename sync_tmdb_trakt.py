@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# (c) Copyright 2016-2020 xbgmsharp <xbgmsharp@gmail.com>
+# (c) Copyright 2016-2021 xbgmsharp <xbgmsharp@gmail.com>
 #
 # Purpose:
 # Sync TMDB discovery into a Trakt.tv list
 #
 # Requirement on Ubuntu/Debian Linux system
-# apt-get install python-dateutil python-simplejson python-requests python-openssl jq
+# apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
 #
 # Requirement on Windows on Python 3
 # <python dir>\Scripts\pip3.exe install requests simplejson
@@ -90,6 +90,8 @@ def read_config(args):
                 _configfile = args.config
         if args.verbose:
                 print("Config file: {0}".format(_configfile))
+        # For recording configparser
+        config = ""
         if os.path.exists(_configfile):
                 try:
                         config = configparser.SafeConfigParser()
@@ -114,15 +116,14 @@ def read_config(args):
                         else:
                                 print('Error, you must specify a trakt.tv CLIENT_SECRET')
                                 sys.exit(1)
-                        if config.has_option('TRAKT','OAUTH_TOKEN') and len(config.get('TRAKT','OAUTH_TOKEN')) != 0:
-                                _trakt['oauth_token'] = config.get('TRAKT','OAUTH_TOKEN')
+                        if config.has_option('TRAKT','ACCESS_TOKEN') and len(config.get('TRAKT','ACCESS_TOKEN')) != 0:
+                                _trakt['access_token'] = config.get('TRAKT','ACCESS_TOKEN')
                         else:
-                                print('Warning, authentification is required')
-                        if config.has_option('TRAKT','USERNAME') and len(config.get('TRAKT','USERNAME')) != 0:
-                                _trakt['username'] = config.get('TRAKT','USERNAME')
+                                print('Warning, no access token found. Authentification is required')
+                        if config.has_option('TRAKT','REFRESH_TOKEN') and len(config.get('TRAKT','REFRESH_TOKEN')) != 0:
+                                _trakt['refresh_token'] = config.get('TRAKT','REFRESH_TOKEN')
                         else:
-                                print('Error, you must specify a trakt.tv USERNAME')
-                                sys.exit(1)
+                                print('Warning, no refresh token found. Authentification is required')
                         if config.has_option('TRAKT','BASEURL'):
                                 _trakt['baseurl'] = config.get('TRAKT','BASEURL')
                         if config.has_option('SETTINGS','PROXY'):
@@ -145,8 +146,8 @@ def read_config(args):
                         config.add_section('TRAKT')
                         config.set('TRAKT', 'CLIENT_ID', '')
                         config.set('TRAKT', 'CLIENT_SECRET', '')
-                        config.set('TRAKT', 'OAUTH_TOKEN', '')
-                        config.set('TRAKT', 'USERNAME', '')
+                        config.set('TRAKT', 'ACCESS_TOKEN', '')
+                        config.set('TRAKT', 'REFRESH_TOKEN', '')
                         config.set('TRAKT', 'BASEURL', 'https://api-v2launch.trakt.tv')
                         config.add_section('SETTINGS')
                         config.set('SETTINGS', 'PROXY', False)
