@@ -168,15 +168,13 @@ $ python export_trakt.py
 ```
 
 * Edit the config file ``config.ini`` and specify the ``client_id`` and ``client_secret`` as well as any other settings appropriate to your enviromenent, eg: URL, proxy, etc...
-Refer to ``Configuration details`` section for more information.
+Refer to [Configuration details](#configuration) section for more information.
 
 ```
 $ vim config.ini
 ```
 
-* Run the script to authenticate against Trakt.tv API using the PIN method and it will generate you an ``oauth_token``.
-You will be prompted to open a link into a browser and paste the pincode back to the script. 
-Make sure you save the generated ``oauth_token`` into the config file ``config.ini`` for later use.
+* Run the script to authenticate against Trakt.tv API using the PIN method and it will generate an ``access_token`` and ``refresh_token``. You will be prompted to open a link into a browser and paste the pincode back to the script. The generated ``access_token`` and ``refresh_token`` are automaticaly saved into the config file ``config.ini``.
 
 ```
 $ python export_trakt.py
@@ -190,7 +188,8 @@ $ python export_trakt.py
 [TRAKT]
 client_id = xxxxxxxxxxxxxxxxxxxxxxxxx
 client_secret = xxxxxxxxxxxxxxxxxxxxxx
-oauth_token = xxxxxxxxxxxxxxxxxxxxxxx
+access_token =
+refresh_token =
 baseurl = https://api-v2launch.trakt.tv
 [SETTINGS]
 proxy = False
