@@ -153,7 +153,7 @@ def write_csv(options, results):
         # sort
         if options.sortorder == 'asc':
                 sorted_results = sorted(results, key = lambda kv:(kv[options.time]))
-                results = sorted_results    
+                results = sorted_results
         # Write result CSV, works with windows now
         with open(options.output, 'w', encoding = 'utf-8', newline='') as fp:
                 mycsv = csv.DictWriter(fp, fieldnames=list(results[0].keys()), quoting=csv.QUOTE_ALL)
