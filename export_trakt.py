@@ -50,8 +50,6 @@ _trakt = {
         'access_token'  :       '', # Auth details for trakt API
         'refresh_token' :       '', # Auth details for trakt API
         'baseurl'       :       'https://api.trakt.tv', # Sandbox environment https://api-staging.trakt.tv,
-        'config_parser' :       '', # configparser.ConfigParser object
-        'config_path'   :       '', # path of config file
 }
 
 _headers = {
@@ -82,7 +80,6 @@ def read_config(options):
         Read config file and if provided overwrite default values
         If no config file exist, create one with default values
         """
-        global work_dir
         work_dir = ''
         if getattr(sys, 'frozen', False):
                 work_dir = os.path.dirname(sys.executable)
@@ -93,11 +90,9 @@ def read_config(options):
                 _configfile = options.config
         if options.verbose:
                 print("Config file: {0}".format(_configfile))
-        # For recording configparser
-        config = ""
         if os.path.exists(_configfile):
                 try:
-                        config = configparser.ConfigParser(os.environ)
+                        config = configparser.ConfigParser()
                         config.read(_configfile)
                         if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
@@ -126,6 +121,7 @@ def read_config(options):
                                 _proxy['port'] = config.get('SETTINGS','PROXY_PORT')
                                 _proxyDict['http'] = _proxy['host']+':'+_proxy['port']
                                 _proxyDict['https'] = _proxy['host']+':'+_proxy['port']
+                        return config
                 except:
                         print("Error reading configuration file {0}".format(_configfile))
                         sys.exit(1)
@@ -149,8 +145,6 @@ def read_config(options):
                 except:
                         print("Error writing configuration file {0}".format(_configfile))
                 sys.exit(1)
-        _trakt['config_parser'] = config
-        _trakt['config_path'] = _configfile
 
 def write_csv(options, results):
         """Write list output into a CSV file format"""
@@ -159,7 +153,7 @@ def write_csv(options, results):
         # sort
         if options.sortorder == 'asc':
                 sorted_results = sorted(results, key = lambda kv:(kv[options.time]))
-                results = sorted_results	
+                results = sorted_results    
         # Write result CSV, works with windows now
         with open(options.output, 'w', encoding = 'utf-8', newline='') as fp:
                 mycsv = csv.DictWriter(fp, fieldnames=list(results[0].keys()), quoting=csv.QUOTE_ALL)
@@ -168,33 +162,55 @@ def write_csv(options, results):
                     mycsv.writerow(row)
         fp.close()
 
-def api_auth(options):
+def api_auth(options, config=None, refresh=False):
         """API call for authentification OAUTH"""
-        print("Manual authentification. Open the link in a browser and paste the pincode when prompted")
-        print(("https://trakt.tv/oauth/authorize?response_type=code&"
-              "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-                  _trakt["client_id"])))
-        pincode = str(input('Input PIN:'))
-        url = _trakt['baseurl'] + '/oauth/token'
-        values = {
-            "code": pincode,
-            "client_id": _trakt["client_id"],
-            "client_secret": _trakt["client_secret"],
-            "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-            "grant_type": "authorization_code"
-        }
+        values = None
+        if refresh == False:
+            print("Manual authentification. Open the link in a browser and paste the pincode when prompted")
+            print(("https://trakt.tv/oauth/authorize?response_type=code&"
+                  "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
+                      _trakt["client_id"])))
+            pincode = str(input('Input PIN:'))
+            # Exchange code for access_token
+            # First run
+            values = {
+                "code": pincode,
+                "client_id": _trakt["client_id"],
+                "client_secret": _trakt["client_secret"],
+                "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                "grant_type": "authorization_code"
+            }
+        else:
+            # Exchange refresh_token for access_token
+            # Refresh token
+            values = {
+                    "refresh_token": _trakt['refresh_token'],
+                    "client_id": _trakt['client_id'],
+                    "client_secret": _trakt["client_secret"],
+                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                    "grant_type": "refresh_token"
+            }
 
+        url = _trakt['baseurl'] + '/oauth/token'
         request = requests.post(url, data=values)
-        response = request.json()
-        _headers['Authorization'] = 'Bearer ' + response["access_token"]
-        _headers['trakt-api-key'] = _trakt['client_id']
-        config = _trakt['config_parser']
-        config.set('TRAKT', 'ACCESS_TOKEN', response["access_token"])
-        config.set('TRAKT', 'REFRESH_TOKEN', response["refresh_token"])
-        with open(options.config, 'w') as configfile:
-            config.write(configfile)
-            print('Saved as "access_token" in file {0}: {1}'.format(options.config, response["access_token"]))
-            print('Saved as "refresh_token" in file {0}: {1}'.format(options.config, response["refresh_token"]))
+        if request.status_code == 200:
+            response = request.json()
+            #pp.pprint(response)
+            print("Authentication successful")
+            _headers['Authorization'] = 'Bearer ' + response["access_token"]
+            _headers['trakt-api-key'] = _trakt['client_id']
+            # Update configuration file
+            if config:
+                config.set('TRAKT', 'ACCESS_TOKEN', response["access_token"])
+                config.set('TRAKT', 'REFRESH_TOKEN', response["refresh_token"])
+                with open(options.config, 'w') as configfile:
+                    config.write(configfile)
+                    print('Saved as "access_token" in file {0}: {1}'.format(options.config, response["access_token"]))
+                    print('Saved as "refresh_token" in file {0}: {1}'.format(options.config, response["refresh_token"]))
+        else:
+            print("Sorry, the authentication was not successful.")
+            pp.pprint(request)
+            sys.exit(1)
 
 def api_get_list(options, page):
         """API call for Sync / Get list by type"""
@@ -368,42 +384,42 @@ def main():
         ## Read configuration and validate
         config = read_config(options)
 
-        ## Try refreshing to get new access token. If it doesn't work, user needs to authenticate again.
-        if _trakt['refresh_token']:
-            values = {
-                    "refresh_token": _trakt['refresh_token'],
-                    "client_id": _trakt['client_id'],
-                    "client_secret": _trakt["client_secret"],
-                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-                    "grant_type": "refresh_token"
-            }
+        ## Display debug information
+        if options.verbose:
+            print("Config: {}".format(config))
 
-            url = _trakt['baseurl'] + '/oauth/token'
-            r = requests.post(url, data=values)
-            #print(r.status_code)
-            if r.status_code == 200:
-                response = r.json()
-                _trakt['access_token'] = response["access_token"]
-                _trakt['refresh_token'] = response["refresh_token"]
-                _headers['Authorization'] = 'Bearer ' + response["access_token"]
+        ## Trakt auth
+        if not _trakt['access_token'] and not _trakt['refresh_token'] and \
+            _trakt['client_id'] and _trakt['client_secret']:
+            print("Trakt, no token found in config file, requesting authorization_code")
+            api_auth(options, config, False)
+        elif _trakt['access_token'] and _trakt['refresh_token'] and \
+            _trakt['client_id'] and _trakt['client_secret']:
+            ## Check token validity
+            ## Trakt access_token is valid for 3 months before it needs to be refreshed again.
+            today = datetime.datetime.today()
+            modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(options.config))
+            duration = today - modified_date
+            if duration and duration.seconds < 2592000:
+                # 30*24*60*60 = 2592000
+                print("Trakt, skipped access token refresh, token is less than 30 days, only %s" % duration)
+                _headers['Authorization'] = 'Bearer ' + _trakt["access_token"]
                 _headers['trakt-api-key'] = _trakt['client_id']
-                config = _trakt['config_parser']
-                config.set('TRAKT', 'ACCESS_TOKEN', response["access_token"])
-                config.set('TRAKT', 'REFRESH_TOKEN', response["refresh_token"])
-                with open(options.config, 'w') as configfile:
-                    config.write(configfile)
-                    print('Saved as "access_token" in file {0}: {1}'.format(options.config, response["access_token"]))
-                    print('Saved as "refresh_token" in file {0}: {1}'.format(options.config, response["refresh_token"]))
             else:
-                print("Refreshing access_token failed. Get new refresh_token and access_token by manually authenticating again")
-                api_auth(options)
+                ## Exchange refresh_token for access_token
+                print("Trakt, access token refresh, token is more than 30 days, token is %s old" % duration)
+                api_auth(options, config, True)
         else:
-            print("No refresh_token found in config file. Get new refresh_token and access_token by manually authenticating again")
-            api_auth(options)
+            print("No valid authentication parameters found in config file")
+            sys.exit(1)
+
+        if not _headers['Authorization']:
+            print("No valid Authorization header")
+            sys.exit(1)
 
         ## Display debug information
         if options.verbose:
-            print("trakt: {}".format(_trakt))
+            print("Trakt: {}".format(_trakt))
             print("Authorization header: {}".format(_headers['Authorization']))
 
         ## Get lists from Trakt user
