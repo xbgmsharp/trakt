@@ -18,22 +18,20 @@ Refer to [README.md](README.md#configuration) for details.
 ### Export usage
 
 ```text
-usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
-                       [-t {movies,shows,episodes}]
-                       [-l {watchlist,collection,history}] [-u USERLIST] [-C]
-                       [-D] [-V]
+usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]] [-f {imdb,tmdb,tvdb,tvrage,trakt}] [-t {movies,shows,episodes}]
+                       [-l {watchlist,collection,history}] [-u USERLIST] [-C] [-D] [-s {asc,desc}] [-V]
 
 This program export Movies or TVShows IDs from Trakt.tv list.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -v, --version         show program's version number and exit
+  -v                    show program's version number and exit
   -c CONFIG, --config CONFIG
-                        allow to overwrite default config filename, default
-                        config.ini
+                        allow to overwrite default config filename, default config.ini
   -o [OUTPUT], --output [OUTPUT]
-                        allow to overwrite default output filename, default
-                        None
+                        allow to overwrite default output filename, default None
+  -f {imdb,tmdb,tvdb,tvrage,trakt}, --format {imdb,tmdb,tvdb,tvrage,trakt}
+                        allow to overwrite default ID type format, default imdb
   -t {movies,shows,episodes}, --type {movies,shows,episodes}
                         allow to overwrite type, default movies
   -l {watchlist,collection,history}, --list {watchlist,collection,history}
@@ -42,6 +40,8 @@ optional arguments:
                         allow to export a user custom list, default None
   -C, --clean           empty list after export, default False
   -D, --duplicate       remove duplicate from list after export, default False
+  -s {asc,desc}, --sort {asc,desc}
+                        allow to overwrite sort order, default desc
   -V, --verbose         print additional verbose information, default True
 
 Read a list from Trakt API. Export them into a CSV file.
