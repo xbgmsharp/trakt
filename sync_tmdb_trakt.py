@@ -109,8 +109,7 @@ def read_config(args):
                         if config.has_option('TMDB','FILTER') and len(config.get('TMDB','FILTER')) != 0:
                                 _tmdb['filter'] = config.get('TMDB','FILTER')
                         else:
-                                print('Error, you must specify a TMDB discovery FILTER')
-                                sys.exit(1)
+                                print('Warning, no filter found. default filter will apply')
                         if config.has_option('TRAKT','CLIENT_ID') and len(config.get('TRAKT','CLIENT_ID')) != 0:
                                 _trakt['client_id'] = config.get('TRAKT','CLIENT_ID')
                         else:
@@ -171,15 +170,19 @@ def tmdb_api_discover(args):
         # https://developers.themoviedb.org/3/discover/movie-discover
         tmdb.API_KEY = _tmdb['apikey']
         discover = tmdb.Discover()
-        kwargs = {  'page': 1,
-                    'vote_average.gte': 6,
-                    'primary_release_year': 2021,
-                    'with_genres': 35,
-                    'sort_by': 'popularity.desc',
-                    'include_adult': 'false',
-                    'include_video': 'false'
-                }
-        pp.pprint(kwargs)
+        if not _tmdb['filter']:
+            kwargs = {  "page": 1,
+                        "vote_average.gte": 6,
+                        "primary_release_year": datetime.datetime.today().year,
+                        "with_genres": 35,
+                        "sort_by": "popularity.desc",
+                        "include_adult": "false",
+                        "include_video": "false"
+                    }
+        else:
+            kwargs = json.loads(_tmdb['filter'])
+        if args.verbose:
+            print("TMDB filter {}".format(kwargs))
         if args.type == "movies":
             response = discover.movie(**kwargs)
         else:
@@ -219,11 +222,11 @@ def api_auth(options, config=None, refresh=False):
             # Exchange refresh_token for access_token
             # Refresh token
             values = {
-                    "refresh_token": _trakt['refresh_token'],
-                    "client_id": _trakt['client_id'],
-                    "client_secret": _trakt["client_secret"],
-                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-                    "grant_type": "refresh_token"
+                "refresh_token": _trakt['refresh_token'],
+                "client_id": _trakt['client_id'],
+                "client_secret": _trakt["client_secret"],
+                "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                "grant_type": "refresh_token"
             }
 
         url = _trakt['baseurl'] + '/oauth/token'
