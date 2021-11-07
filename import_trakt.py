@@ -174,11 +174,11 @@ def api_auth(options, config=None, refresh=False):
             # Exchange refresh_token for access_token
             # Refresh token
             values = {
-                    "refresh_token": _trakt['refresh_token'],
-                    "client_id": _trakt['client_id'],
-                    "client_secret": _trakt["client_secret"],
-                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-                    "grant_type": "refresh_token"
+                "refresh_token": _trakt['refresh_token'],
+                "client_id": _trakt['client_id'],
+                "client_secret": _trakt["client_secret"],
+                "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                "grant_type": "refresh_token"
             }
 
         url = _trakt['baseurl'] + '/oauth/token'

@@ -184,11 +184,11 @@ def api_auth(options, config=None, refresh=False):
             # Exchange refresh_token for access_token
             # Refresh token
             values = {
-                    "refresh_token": _trakt['refresh_token'],
-                    "client_id": _trakt['client_id'],
-                    "client_secret": _trakt["client_secret"],
-                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-                    "grant_type": "refresh_token"
+                "refresh_token": _trakt['refresh_token'],
+                "client_id": _trakt['client_id'],
+                "client_secret": _trakt["client_secret"],
+                "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                "grant_type": "refresh_token"
             }
 
         url = _trakt['baseurl'] + '/oauth/token'
@@ -243,11 +243,9 @@ def api_get_list(options, page):
         return response_arr
 
 def api_get_userlists(options, page):
-        """API call for Sync / Get list by type"""
+        """API call for Sync / Get userlists"""
         url = _trakt['baseurl'] + '/users/{user}/lists'.format(
                             user=options.userlist, page=page, limit=1000)
-        #url = _trakt['baseurl'] + '/users/{user}/lists/{list_id}?page={page}&limit={limit}'.format(
-        #                    list=options.list, type=options.type, page=page, limit=1000)
         if options.verbose:
             print(url)
         if _proxy['proxy']:
@@ -256,15 +254,15 @@ def api_get_userlists(options, page):
             r = requests.get(url, headers=_headers, timeout=(5, 60))
         #pp.pprint(r.headers)
         if r.status_code != 200:
-            print("Error fetching Get {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text))
+            print("Error fetching Get {user}: {status} [{text}]".format(
+                    user=options.userlist, status=r.status_code, text=r.text))
             return None
         else:
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count' in r.headers and r.headers['X-Pagination-Page-Count']:
-            print("Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
+            print("Fetched page {page} of {PageCount} pages for {user} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], user=options.userlist))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_list(options, page+1)
 
@@ -283,14 +281,14 @@ def api_get_userlist(options, page):
         #pp.pprint(r.headers)
         if r.status_code != 200:
             print("Error fetching Get {list}: {status} [{text}]".format(
-                    list=options.list, status=r.status_code, text=r.text))
+                    user=options.userlist, status=r.status_code, text=r.text))
             return None
         else:
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count' in r.headers and r.headers['X-Pagination-Page-Count']:
-            print("Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
+            print("Fetched page {page} of {PageCount} pages for {user} list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], user=options.userlist))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_userlist(options, page+1)
 
