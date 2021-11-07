@@ -28,8 +28,6 @@ try:
         import requests
         requests.packages.urllib3.disable_warnings()
         import csv
-        #from ratelimit import limits
-        import time
 except:
         sys.exit("Please use your favorite method to install the following module requests and simplejson to use this script")
 
@@ -38,6 +36,7 @@ import configparser
 import datetime
 import collections
 import pprint
+import time
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -244,10 +243,9 @@ def api_get_list(options, page):
 
         return response_arr
 
-# @limits(calls=1, period=1)
 def api_add_to_list(options, import_data):
         """API call for Sync / Add items to list"""
-
+        # 429 [AUTHED_API_POST_LIMIT rate limit exceeded. Please wait 1 seconds then retry your request.]
         # Rate limit for API
         time.sleep(1)
         url = _trakt['baseurl'] + '/sync/{list}'.format(list=options.list)
@@ -429,7 +427,7 @@ def main():
             print("No valid authentication parameters found in config file")
             sys.exit(1)
 
-        if not _headers['Authorization']:
+        if not _headers['Authorization'] and not _headers['trakt-api-key']:
             print("No valid Authorization header")
             sys.exit(1)
 
@@ -437,6 +435,7 @@ def main():
         if options.verbose:
             print("Trakt: {}".format(_trakt))
             print("Authorization header: {}".format(_headers['Authorization']))
+            print("trakt-api-key header: {}".format(_headers['trakt-api-key']))
 
         # Empty list prior to import
         if options.clean:
