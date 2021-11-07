@@ -52,6 +52,10 @@ Read a list from Trakt API. Export them into a CSV file.
 
 Export all movies from watchlist:
 
+  $ ./export_trakt.py -c config.ini -t movies -o export_movies_tmdb.csv -f tmdb
+
+Export all movies from watchlist:
+
 	$ ./export_trakt.py -c config.ini -t movies -o export_movies_watchlist.csv -l watchlist
 
 Export all tvshows from the history list:
