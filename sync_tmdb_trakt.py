@@ -179,6 +179,7 @@ def tmdb_api_discover(args):
                     'include_adult': 'false',
                     'include_video': 'false'
                 }
+        pp.pprint(kwargs)
         if args.type == "movies":
             response = discover.movie(**kwargs)
         else:
@@ -247,7 +248,7 @@ def api_auth(options, config=None, refresh=False):
             sys.exit(1)
 
 def api_user(args):
-        """API call for usernbame / Get username"""
+        """API call for settings / Get username"""
         url = _trakt['baseurl'] + '/users/settings'
         if args.verbose:
             print(url)
@@ -363,8 +364,8 @@ def api_get_history_list(args, page):
             global response_arr
             response_arr += json.loads(r.text)
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
-            print("Fetched page {page} of {PageCount} pages for {list} list".format(
-                    page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=args.list))
+            print("Fetched page {page} of {PageCount} pages for history list".format(
+                    page=page, PageCount=r.headers['X-Pagination-Page-Count']))
             if page != int(r.headers['X-Pagination-Page-Count']):
                 api_get_history_list(args, page+1)
 
