@@ -60,6 +60,7 @@ Discover movie using TMDB filter (year, genre, vote average). Import them into a
 #### Sample sync usage
 
 Get all TMDB movies from filter and import them into trakt.tv in list comedy
+
   $ ./sync_tmdb_trakt.py -c /tmp/config.ini -l comedy
 
 ## Support
