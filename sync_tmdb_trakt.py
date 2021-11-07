@@ -36,6 +36,7 @@ import configparser
 import datetime
 import collections
 import pprint
+import time
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -47,7 +48,8 @@ Import them into a list in Trakt.tv, mark as seen if need."""
 _trakt = {
         'client_id'     :       '', # Auth details for trakt API
         'client_secret' :       '', # Auth details for trakt API
-        'oauth_token'   :       '', # Auth details for trakt API
+        'access_token'  :       '', # Auth details for trakt API
+        'refresh_token' :       '', # Auth details for trakt API
         'username'      :       '', # trakt.tv username
         'baseurl'       :       'https://api-v2launch.trakt.tv' # Sandbox environment https://api-staging.trakt.tv
 }
@@ -85,7 +87,6 @@ def read_config(args):
         Read config file and if provided overwrite default values
         If no config file exist, create one with default values
         """
-        global work_dir
         work_dir = ''
         if getattr(sys, 'frozen', False):
                 work_dir = os.path.dirname(sys.executable)
@@ -96,11 +97,9 @@ def read_config(args):
                 _configfile = args.config
         if args.verbose:
                 print("Config file: {0}".format(_configfile))
-        # For recording configparser
-        config = ""
         if os.path.exists(_configfile):
                 try:
-                        config = configparser.SafeConfigParser()
+                        config = configparser.ConfigParser()
                         config.read(_configfile)
                         if config.has_option('TMDB','APIKEY') and len(config.get('TMDB','APIKEY')) != 0:
                                 _tmdb['apikey'] = config.get('TMDB','APIKEY')
@@ -139,6 +138,7 @@ def read_config(args):
                                 _proxy['port'] = config.get('SETTINGS','PROXY_PORT')
                                 _proxyDict['http'] = _proxy['host']+':'+_proxy['port']
                                 _proxyDict['https'] = _proxy['host']+':'+_proxy['port']
+                        return config
                 except:
                         print("Error reading configuration file {0}".format(_configfile))
                         sys.exit(1)
@@ -168,9 +168,17 @@ def read_config(args):
 
 def tmdb_api_discover(args):
         """TMDB API call to discover movie from the filter"""
+        # https://developers.themoviedb.org/3/discover/movie-discover
         tmdb.API_KEY = _tmdb['apikey']
         discover = tmdb.Discover()
-        kwargs = {'page': 1, 'vote_average.gte': 6, 'year': 2015, 'with_genres': 35}
+        kwargs = {  'page': 1,
+                    'vote_average.gte': 6,
+                    'primary_release_year': 2021,
+                    'with_genres': 35,
+                    'sort_by': 'popularity.desc',
+                    'include_adult': 'false',
+                    'include_video': 'false'
+                }
         if args.type == "movies":
             response = discover.movie(**kwargs)
         else:
@@ -180,34 +188,80 @@ def tmdb_api_discover(args):
         print("TMDB found {total} items".format(total=response['total_results']))
         results = response['results']
         while int(response['page']) < int(response['total_pages']):
-            kwargs = {'page': response['page']+1, 'vote_average.gte': 6, 'year': 2015, 'with_genres': 35}
+            # Increment page
+            kwargs['page'] = response['page']+1
             response = discover.movie(**kwargs)
             if args.verbose:
                 print("TMDB fetched page {page} of {total} pages".format(total=response['total_pages'], page=response['page']))
             results += response['results']
         return results
 
-def api_auth(args):
+def api_auth(options, config=None, refresh=False):
         """API call for authentification OAUTH"""
-        print("Open the link in a browser and paste the pincode when prompted")
-        print(("https://trakt.tv/oauth/authorize?response_type=code&"
-              "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
-                  _trakt["client_id"])))
-        pincode = str(input('Input:'))
-        url = _trakt['baseurl'] + '/oauth/token'
-        values = {
-            "code": pincode,
-            "client_id": _trakt["client_id"],
-            "client_secret": _trakt["client_secret"],
-            "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
-            "grant_type": "authorization_code"
-        }
+        values = None
+        if refresh == False:
+            print("Manual authentification. Open the link in a browser and paste the pincode when prompted")
+            print(("https://trakt.tv/oauth/authorize?response_type=code&"
+                  "client_id={0}&redirect_uri=urn:ietf:wg:oauth:2.0:oob".format(
+                      _trakt["client_id"])))
+            pincode = str(input('Input PIN:'))
+            # Exchange code for access_token
+            # First run
+            values = {
+                "code": pincode,
+                "client_id": _trakt["client_id"],
+                "client_secret": _trakt["client_secret"],
+                "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                "grant_type": "authorization_code"
+            }
+        else:
+            # Exchange refresh_token for access_token
+            # Refresh token
+            values = {
+                    "refresh_token": _trakt['refresh_token'],
+                    "client_id": _trakt['client_id'],
+                    "client_secret": _trakt["client_secret"],
+                    "redirect_uri": "urn:ietf:wg:oauth:2.0:oob",
+                    "grant_type": "refresh_token"
+            }
 
+        url = _trakt['baseurl'] + '/oauth/token'
         request = requests.post(url, data=values)
-        response = request.json()
-        _headers['Authorization'] = 'Bearer ' + response["access_token"]
-        _headers['trakt-api-key'] = _trakt['client_id']
-        print('Save as "oauth_token" in file {0}: {1}'.format(args.config, response["access_token"]))
+        if request.status_code == 200:
+            response = request.json()
+            #pp.pprint(response)
+            print("Authentication successful")
+            _headers['Authorization'] = 'Bearer ' + response["access_token"]
+            _headers['trakt-api-key'] = _trakt['client_id']
+            # Update configuration file
+            if config:
+                config.set('TRAKT', 'ACCESS_TOKEN', response["access_token"])
+                config.set('TRAKT', 'REFRESH_TOKEN', response["refresh_token"])
+                with open(options.config, 'w') as configfile:
+                    config.write(configfile)
+                    print('Saved as "access_token" in file {0}: {1}'.format(options.config, response["access_token"]))
+                    print('Saved as "refresh_token" in file {0}: {1}'.format(options.config, response["refresh_token"]))
+        else:
+            print("Sorry, the authentication was not successful.")
+            pp.pprint(request)
+            sys.exit(1)
+
+def api_user(args):
+        """API call for usernbame / Get username"""
+        url = _trakt['baseurl'] + '/users/settings'
+        if args.verbose:
+            print(url)
+        if _proxy['proxy']:
+            r = requests.get(url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
+        else:
+            r = requests.get(url, headers=_headers, timeout=(5, 60))
+        #pp.pprint(r.headers)
+        if r.status_code != 200:
+            print("Error fetching user settings: {status} [{text}]".format(
+                    status=r.status_code, text=r.text))
+            return None
+        else:
+            return json.loads(r.text)
 
 def api_get_lists(args):
         """API call for Sync / Get list for username"""
@@ -246,6 +300,9 @@ def api_get_items_from_list(args):
 
 def api_add_items_to_list(args, import_data):
         """API call for Sync / Add items to custom user list"""
+        # 429 [AUTHED_API_POST_LIMIT rate limit exceeded. Please wait 1 seconds then retry your request.]
+        # Rate limit for API
+        time.sleep(1)
         url = _trakt['baseurl'] + '/users/{username}/lists/{id}/items'.format(
                                 username=_trakt['username'], id=args.list)
         values = { args.type : import_data }
@@ -394,7 +451,7 @@ def main():
                       default=True, action='store_true', dest='verbose')
         args = parser.parse_args()
 
-        # Display debug information
+        ## Display debug information
         if args.verbose:
             print("Args: %s" % args)
 
@@ -404,21 +461,60 @@ def main():
             except:
                 sys.exit("Error, invalid format, it's must be UTC datetime, eg: '2016-01-01T00:00:00.000Z'")
 
-        # Read configuration and validate
-        read_config(args)
+        ## Read configuration and validate
+        config = read_config(args)
 
-        # Display oauth token if exist, otherwise authenticate to get one
-        if _trakt['oauth_token']:
-            _headers['Authorization'] = 'Bearer ' + _trakt['oauth_token']
-            _headers['trakt-api-key'] = _trakt['client_id']
+        ## Display debug information
+        if args.verbose:
+            print("Config: {}".format(config))
+
+        ## Trakt auth
+        if not _trakt['access_token'] and not _trakt['refresh_token'] and \
+            _trakt['client_id'] and _trakt['client_secret']:
+            print("Trakt, no token found in config file, requesting authorization_code")
+            api_auth(args, config, False)
+        elif _trakt['access_token'] and _trakt['refresh_token'] and \
+            _trakt['client_id'] and _trakt['client_secret']:
+            ## Check token validity
+            ## Trakt access_token is valid for 3 months before it needs to be refreshed again.
+            today = datetime.datetime.today()
+            modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(args.config))
+            duration = today - modified_date
+            if duration and duration.seconds < 2592000:
+                # 30*24*60*60 = 2592000
+                print("Trakt, skipped access token refresh, token is less than 30 days, only %s" % duration)
+                _headers['Authorization'] = 'Bearer ' + _trakt["access_token"]
+                _headers['trakt-api-key'] = _trakt['client_id']
+            else:
+                ## Exchange refresh_token for access_token
+                print("Trakt, access token refresh, token is more than 30 days, token is %s old" % duration)
+                api_auth(args, config, True)
         else:
-            api_auth(args)
+            print("No valid authentication parameters found in config file")
+            sys.exit(1)
 
-        # Display debug information
+        if not _headers['Authorization'] and not _headers['trakt-api-key']:
+            print("No valid Authorization header")
+            sys.exit(1)
+
+        ## Display debug information
         if args.verbose:
             print("API Trakt: {}".format(_trakt))
             print("Authorization header: {}".format(_headers['Authorization']))
+            print("trakt-api-key header: {}".format(_headers['trakt-api-key']))
             print("API TMDB: {}".format(_tmdb))
+
+        # Find trakt.tv username/slug
+        if not _trakt['username']:
+            user_settings = api_user(args)
+            print("User settings: {}".format(user_settings))
+            if user_settings and user_settings['user'] and \
+                user_settings['user']['ids'] and user_settings['user']['ids']['slug']:
+                _trakt['username'] = user_settings['user']['ids']['slug']
+                print("Got slug username '{0}'".format(_trakt['username']))
+            else:
+                print("Error, trakt.tv user slug not found for user")
+                sys.exit(1)
 
         # Find trakt.tv custom user list
         if args.list:
@@ -432,7 +528,7 @@ def main():
             if args.list in slug_list:
                 print("Found trakt.tv list slug '{0}'".format(args.list))
             else:
-                print("Error, trakt.tv list slug '{0}' no found for user '{1}'".format(
+                print("Error, trakt.tv list slug '{0}' not found for user '{1}'".format(
                                                         args.list, _trakt['username']))
                 sys.exit(1)
 
@@ -473,7 +569,7 @@ def main():
                                                                     lang=movie['original_language']))
                     skip += 1
                     continue
-            if args.skipwatched and (movie['id'] in watched):
+            if args.skipwatched and watched and (movie['id'] in watched):
                 print("Skip watched movie '{title}' ".format(title=movie['original_title'].encode('utf-8')))
                 skip += 1
                 continue
