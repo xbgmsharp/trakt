@@ -18,7 +18,7 @@ Refer to [README.md](README.md#configuration) for details.
 ```text
 [TMDB]
 apikey = xxxxxxxxxxxxxxxxxxxxxxxxx
-filter = {'vote_average.gte': 6, 'year': 2015, 'with_genres': 35}
+filter = {"with_genres": 35}
 [TRAKT]
 (...)
 [SETTINGS]
