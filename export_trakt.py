@@ -413,7 +413,7 @@ def main():
             print("No valid authentication parameters found in config file")
             sys.exit(1)
 
-        if not _headers['Authorization']:
+        if not _headers['Authorization'] and not _headers['trakt-api-key']:
             print("No valid Authorization header")
             sys.exit(1)
 
@@ -421,6 +421,7 @@ def main():
         if options.verbose:
             print("Trakt: {}".format(_trakt))
             print("Authorization header: {}".format(_headers['Authorization']))
+            print("trakt-api-key header: {}".format(_headers['trakt-api-key']))
 
         ## Get lists from Trakt user
         export_data = []
