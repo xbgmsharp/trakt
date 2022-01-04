@@ -379,6 +379,10 @@ def main():
         if not options.output:
             options.output = 'export_{type}_{list}.csv'.format(type=options.type, list=options.list)
 
+        if options.type == 'episodes' and options.format == "imdb":
+            options.format = "tmdb"
+            print("Forcing format to tmdb for type episode")
+
         ## Read configuration and validate
         config = read_config(options)
 
@@ -508,6 +512,9 @@ def main():
                                     'episode_title' : data['episode']['title'],
                                     'show_title' : data['show']['title']})
         # print(export_csv)
+        if len(export_csv) == 0:
+            print("Warning no data to export, probably a bug")
+            sys.exit(1)
         ## Write export data into CSV file
         write_csv(options, export_csv)
 
