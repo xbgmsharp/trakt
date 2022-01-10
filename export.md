@@ -19,7 +19,7 @@ Refer to [README.md](README.md#configuration) for details.
 
 ```text
 usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]] [-f {imdb,tmdb,tvdb,tvrage,trakt}] [-t {movies,shows,episodes}]
-                       [-l {watchlist,collection,history}] [-u USERLIST] [-C] [-D] [-s {asc,desc}] [-V]
+                       [-l {watchlist,collection,history}] [-u USERLIST] [-I LISTID] [-C] [-D] [-s {asc,desc}] [-V]
 
 This program export Movies or TVShows IDs from Trakt.tv list.
 
@@ -38,6 +38,8 @@ options:
                         allow to overwrite default list, default history
   -u USERLIST, --userlist USERLIST
                         allow to export a user custom list, default None
+  -I LISTID, --listid LISTID
+                        allow to export a specific custom list, default None
   -C, --clean           empty list after export, default False
   -D, --duplicate       remove duplicate from list after export, default False
   -s {asc,desc}, --sort {asc,desc}
@@ -73,6 +75,12 @@ Export all shows from the history list and remove duplicate:
 Export all movies from a user list:
 
 	$ ./export_trakt.py -c config.ini -t movies -u <username> -o export_movies_<username>.csv
+
+Export all movies from a specific user list:
+
+	$ ./export_trakt.py -c config.ini -t movies -u <username> -o export_movies_<username>.csv -I <listid>
+
+(you can find the ID if you go to the list and click "Progress" on the top right, and you will find the url in the address bar)
 
 ## Support
 

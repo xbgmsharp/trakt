@@ -11,8 +11,8 @@
 FROM python:alpine
 
 RUN apk update && apk add git
-RUN git clone https://github.com/xbgmsharp/trakt
 
 WORKDIR /trakt
+COPY . .
 
 RUN pip install requests simplejson
