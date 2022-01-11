@@ -348,6 +348,9 @@ def main():
         parser.add_argument('-u', '--userlist',
                       help='allow to export a user custom list, default %(default)s',
                       dest='userlist', default=None)
+        parser.add_argument('--listid',
+                      help='allow to export specific user custom list id, default %(default)s',
+                      dest='listid', default=None)
         parser.add_argument('-C', '--clean',
                       help='empty list after export, default %(default)s',
                       default=False, action='store_true', dest='clean')
@@ -435,10 +438,14 @@ def main():
                 for data in export_data:
                     print("Found list id '{id}' name '{name}' with {items} items own by {own}".format(
                             name=data['name'], id=data['ids']['trakt'], items=data['item_count'], own=data['user']['username']))
-                print("Input the custom list id to export")
-                options.listid = str(input('Input:'))
+                if options.listid == None:
+                    print("Input the custom list id to export")
+                    print("---alternatively add it to the command with `--listid 12345678` together with the --userlist username1")
+                    options.listid = str(input('Input:'))
+
                 global response_arr ## Cleanup global....
                 response_arr = []
+
                 export_data = api_get_userlist(options, 1)
                 #pp.pprint(export_data)
                 if export_data:
