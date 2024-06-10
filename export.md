@@ -18,8 +18,11 @@ Refer to [README.md](README.md#configuration) for details.
 ### Export usage
 
 ```text
-usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]] [-f {imdb,tmdb,tvdb,tvrage,trakt}] [-t {movies,shows,episodes}]
-                       [-l {watchlist,collection,history}] [-u USERLIST] [-I LISTID] [-C] [-D] [-s {asc,desc}] [-V]
+usage: export_trakt.py [-h] [-v] [-c CONFIG] [-o [OUTPUT]]
+                       [-f {imdb,tmdb,tvdb,tvrage,trakt}]
+                       [-t {movies,shows,episodes}]
+                       [-l {watchlist,collection,history}] [-u USERLIST]
+                       [--listid LISTID] [-C] [-D] [-s {asc,desc}] [-V]
 
 This program export Movies or TVShows IDs from Trakt.tv list.
 
@@ -27,19 +30,22 @@ options:
   -h, --help            show this help message and exit
   -v                    show program's version number and exit
   -c CONFIG, --config CONFIG
-                        allow to overwrite default config filename, default config.ini
+                        allow to overwrite default config filename, default
+                        config.ini
   -o [OUTPUT], --output [OUTPUT]
-                        allow to overwrite default output filename, default None
+                        allow to overwrite default output filename, default
+                        None
   -f {imdb,tmdb,tvdb,tvrage,trakt}, --format {imdb,tmdb,tvdb,tvrage,trakt}
-                        allow to overwrite default ID type format, default imdb
+                        allow to overwrite default ID type format, default
+                        imdb
   -t {movies,shows,episodes}, --type {movies,shows,episodes}
                         allow to overwrite type, default movies
   -l {watchlist,collection,history}, --list {watchlist,collection,history}
                         allow to overwrite default list, default history
   -u USERLIST, --userlist USERLIST
                         allow to export a user custom list, default None
-  -I LISTID, --listid LISTID
-                        allow to export a specific custom list, default None
+  --listid LISTID       allow to export specific user custom list id, default
+                        None
   -C, --clean           empty list after export, default False
   -D, --duplicate       remove duplicate from list after export, default False
   -s {asc,desc}, --sort {asc,desc}
@@ -78,7 +84,7 @@ Export all movies from a user list:
 
 Export all movies from a specific user list:
 
-	$ ./export_trakt.py -c config.ini -t movies -u <username> -o export_movies_<username>.csv -I <listid>
+	$ ./export_trakt.py -c config.ini -t movies -u <username> -o export_movies_<username>.csv --listid <listid>
 
 (you can find the ID if you go to the list and click "Progress" on the top right, and you will find the url in the address bar)
 
