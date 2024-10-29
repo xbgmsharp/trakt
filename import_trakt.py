@@ -238,7 +238,7 @@ def api_get_list(options, page):
         if 'X-Pagination-Page-Count'in r.headers and r.headers['X-Pagination-Page-Count']:
             print("Fetched page {page} of {PageCount} pages for {list} list".format(
                     page=page, PageCount=r.headers['X-Pagination-Page-Count'], list=options.list))
-            if page != int(r.headers['X-Pagination-Page-Count']):
+            if page < int(r.headers['X-Pagination-Page-Count']):
                 api_get_list(options, page+1)
 
         return response_arr
@@ -276,6 +276,9 @@ def api_add_to_list(options, import_data):
 
 def api_remove_from_list(options, remove_data):
         """API call for Sync / Remove from list"""
+        # 429 [AUTHED_API_POST_LIMIT rate limit exceeded. Please wait 1 seconds then retry your request.]
+        # Rate limit for API
+        time.sleep(1)
         url = _trakt['baseurl'] + '/sync/{list}/remove'.format(list=options.list)
         if options.type == 'episodes':
             values = { 'shows' : remove_data }
@@ -299,7 +302,7 @@ def api_remove_from_list(options, remove_data):
 def cleanup_list(options):
         """Empty list prior to import"""
         export_data = api_get_list(options, 1)
-        if export_data:
+        if export_data != None:
             print("Found {0} Item-Count".format(len(export_data)))
         else:
             print("Error, Cleanup no item return for {type} from the {list} list".format(
