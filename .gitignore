@@ -2,3 +2,6 @@
 *.csv
 *.ini
 *.pyc
+
+config/
+.venv

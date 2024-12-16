@@ -91,18 +91,12 @@ $ python -V
 Python 3.5
 ```
 
-Install need module dependencies, `python3-openssl` and `jq` are optional
+Setup [`venv`](https://docs.python.org/3/library/venv.html) and install dependencies
 
 ```
-$ apt-get install python3-dateutil python3-simplejson python3-requests python3-openssl jq
-```
-
-### On Arch/Manjaro Linux system
-
-Install dependencies with pacman, `python-pyopenssl` and `jq` are optional
-
-```
-$ pacman -S python python-dateutil python-simplejson python-requests python-pyopenssl jq 
+python -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 ### On Windows system
@@ -115,10 +109,12 @@ Ensure you are running Python 3
 Python 3.5
 ```
 
-Install need module dependencies
+Setup [`venv`](https://docs.python.org/3/library/venv.html) and install dependencies
 
 ```
-<python dir>\Scripts\pip3.exe install requests simplejson
+python -m venv .venv
+.venv\Scripts\activate.bat
+pip3 install -r requirements.txt
 ```
 
 ### On macOS system
@@ -146,14 +142,12 @@ $ pip3 install certifi
 
 Open a new Terminal session so that certificates will be available
 
-Install need module dependencies, `pyopenssl` and `jq` are optional
+Setup [`venv`](https://docs.python.org/3/library/venv.html) and install dependencies
 
-```shell
-$ pip3 install python-dateutil
-$ pip3 install simplejson
-$ pip3 install requests
-$ pip3 install pyopenssl
-$ pip3 install jq
+```
+python -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
 ```
 
 ## Usage

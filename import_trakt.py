@@ -37,6 +37,7 @@ import datetime
 import collections
 import pprint
 import time
+from collections import Counter
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -449,7 +450,7 @@ def main():
 
         # if IDs make the list into trakt format
         data = []
-        results = {'sentids' : 0, 'added' : 0, 'existing' : 0, 'not_found' : 0}
+        results = {'sentids' : 0, 'added' : Counter({}), 'updated' : Counter({}), 'not_found' : {}}
         if read_ids:
             print("Found {0} items to import".format(len(read_ids)))
 
@@ -482,12 +483,7 @@ def main():
                         result = api_add_to_list(options, data)
                         if result:
                             print("Result: {0}".format(result))
-                            if 'added' in result and result['added']:
-                                results['added'] += result['added'][options.type]
-                            if 'existing' in result and result['existing']:
-                                results['existing'] += result['existing'][options.type]
-                            if 'not_found' in result and result['not_found']:
-                                results['not_found'] += len(result['not_found'][options.type])
+                            __update_counters(results, result)
                         data = []
             # Import the rest
             if len(data) > 0:
@@ -496,20 +492,26 @@ def main():
                 result = api_add_to_list(options, data)
                 if result:
                     print("Result: {0}".format(result))
-                    if 'added' in result and result['added']:
-                        results['added'] += result['added'][options.type]
-                    if 'existing' in result and result['existing']:
-                        results['existing'] += result['existing'][options.type]
-                    if 'not_found' in result and result['not_found']:
-                        results['not_found'] += len(result['not_found'][options.type])
+                    __update_counters(results, result)
         else:
             # TODO Read STDIN to ID
             print("No items found, nothing to do.")
             sys.exit(0)
 
-        print("Overall imported {sent} {type}, results added:{added}, existing:{existing}, not_found:{not_found}".format(
+        print("Overall imported {sent} {type}, results added:{added}, updated:{updated}, not_found:{not_found}".format(
                 sent=results['sentids'], type=options.type, added=results['added'],
-                existing=results['existing'], not_found=results['not_found']))
+                updated=results['updated'], not_found=results['not_found']))
+
+def __update_counters(results, result):
+    if 'added' in result and result['added']:
+         results['added'].update(Counter(result['added']))
+    if 'updated' in result and result['updated']:
+         results['updated'].update(Counter(result['updated']))
+    if 'not_found' in result and result['not_found']:
+        for key, value in result['not_found'].items():
+            if key not in results['not_found']:
+                results['not_found'][key] = []
+            results['not_found'][key].extend(value)
 
 if __name__ == '__main__':
         main()
