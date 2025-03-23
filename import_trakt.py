@@ -300,6 +300,25 @@ def api_remove_from_list(options, remove_data):
         else:
             return json.loads(r.text)
 
+def get_imdb_id_by_title(movie_title):
+        """Get IMDB ID by searching movie title using Trakt API"""
+        search_url = _trakt['baseurl'] + '/search/movie?query={0}'.format(movie_title)
+
+        if _proxy['proxy']:
+            r = requests.get(search_url, headers=_headers, proxies=_proxyDict, timeout=(10, 60))
+        else:
+            r = requests.get(search_url, headers=_headers, timeout=(5, 60))
+
+        if r.status_code == 200:
+            results = r.json()
+            if results:
+                # Get the first result (most relevant)
+                movie = results[0]['movie']
+                imdb_id = movie['ids']['imdb']
+                return imdb_id
+
+        return None
+
 def cleanup_list(options):
         """Empty list prior to import"""
         export_data = api_get_list(options, 1)
@@ -455,36 +474,46 @@ def main():
             print("Found {0} items to import".format(len(read_ids)))
 
             for myid in read_ids:
-                # If id (row) exists and is not blank (has a format)
-                if myid and not options.format in myid:
-                    print("Invalid file format, id (row) must exists and is not blank (has a format).")
-                    sys.exit(1)
-                if myid and myid[options.format]:
-                    #pp.pprint(myid)
-                    # If format is not "imdb" it must be cast to an integer
-                    if not options.format == "imdb" and not myid[options.format].startswith('tt'):
-                        myid[options.format] = int(myid[options.format])
-                    if (options.type == "movies" or options.type == "shows") and options.seen:
-                        data.append({'ids':{options.format : myid[options.format]}, "watched_at": options.seen})
-                    elif (options.type == "movies" or options.type == "shows") and options.watched_at:
-                        data.append({'ids':{options.format : myid[options.format]}, "watched_at": myid["watched_at"]})
-                    elif options.type == "episodes" and options.seen:
-                        data.append({'ids':{options.format : myid[options.format]},"watched_at": options.seen})
-                    elif options.type == "episodes" and options.watched_at:
-                        data.append({'ids':{options.format : myid[options.format]},"watched_at": myid["watched_at"]})
-                    elif (options.type == "movies" or options.type == "shows") and options.list == 'ratings' and options.rated_at:
-                        data.append({'ids':{options.format : myid[options.format]}, "rated_at": myid["rated_at"], "rating": myid["rating"]})
-                    else:
-                        data.append({'ids':{options.format : myid[options.format]}})
-                    # Import batch of 10 IDs
-                    if len(data) >= 10:
-                        #pp.pprint(json.dumps(data))
-                        results['sentids'] += len(data)
-                        result = api_add_to_list(options, data)
-                        if result:
-                            print("Result: {0}".format(result))
-                            __update_counters(results, result)
-                        data = []
+                # Check if we have an ID or need to look it up by title
+                if myid and options.format in myid and myid[options.format]:
+                    id_value = myid[options.format]
+                elif myid and 'title' in myid and myid['title']:
+                    # Try to get IMDB ID by title
+                    id_value = get_imdb_id_by_title(myid['title'])
+                    if not id_value:
+                        print(f"Could not find IMDB ID for title: {myid['title']}")
+                        continue
+                    # Update format to imdb since we got an IMDB ID
+                    options.format = 'imdb'
+                else:
+                    print("Row must have either an ID or title")
+                    continue
+
+                # If format is not "imdb" it must be cast to an integer
+                if not options.format == "imdb" and not str(id_value).startswith('tt'):
+                    id_value = int(id_value)
+                if (options.type == "movies" or options.type == "shows") and options.seen:
+                    data.append({'ids':{options.format : id_value}, "watched_at": options.seen})
+                elif (options.type == "movies" or options.type == "shows") and options.watched_at:
+                    data.append({'ids':{options.format : id_value}, "watched_at": myid["watched_at"]})
+                elif options.type == "episodes" and options.seen:
+                    data.append({'ids':{options.format : id_value},"watched_at": options.seen})
+                elif options.type == "episodes" and options.watched_at:
+                    data.append({'ids':{options.format : id_value},"watched_at": myid["watched_at"]})
+                elif (options.type == "movies" or options.type == "shows") and options.list == 'ratings' and options.rated_at:
+                    data.append({'ids':{options.format : id_value}, "rated_at": myid["rated_at"], "rating": myid["rating"]})
+                else:
+                    data.append({'ids':{options.format : id_value}})
+
+                # Import batch of 10 IDs
+                if len(data) >= 10:
+                    #pp.pprint(json.dumps(data))
+                    results['sentids'] += len(data)
+                    result = api_add_to_list(options, data)
+                    if result:
+                        print("Result: {0}".format(result))
+                        __update_counters(results, result)
+                    data = []
             # Import the rest
             if len(data) > 0:
                 #pp.pprint(data)

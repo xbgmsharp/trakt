@@ -96,23 +96,27 @@ Import all episodes with tvshows imdbid from file ``episodes_views.csv`` into hi
 
 #### Movies to add watchlist
 Header line as format must be one 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt'
-Other colums are ignored
-One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt' by line
+If the ID is not available in the specified format, the system will automatically search Trakt.tv's database using the value in the 'title' field to find the correct ID
+Other columns are ignored
 ```
-imdb
-tt22239XX
-tt11712XX
-tt12728XX
+imdb,title
+tt22239XX,
+tt11712XX,
+tt12728XX,
+,The Matrix
+,Inception
 ```
 
 #### TVShows to add to watchlist
 Header line as format must be one 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt'
-Other colums are ignored
-One 'imdb' or 'tmdb' or 'tvdb' or 'tvrage' or 'trakt' by line
+If the ID is not available in the specified format, the system will automatically search Trakt.tv's database using the value in the 'title' field to find the correct ID
+Other columns are ignored
 ```
-imdb
-tt04606XX
-tt12365XX
+imdb,title
+tt04606XX,
+tt12365XX,
+,Breaking Bad
+,The Wire
 ```
 
 #### Episodes as views to history
