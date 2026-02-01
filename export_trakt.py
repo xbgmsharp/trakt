@@ -36,6 +36,7 @@ import configparser
 import datetime
 import collections
 import pprint
+import re
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -318,6 +319,12 @@ def api_remove_from_list(options, remove_data, is_id=False):
         else:
             return json.loads(r.text)
 
+def process_title(options, title):
+        """Processes title to match sort order on the Trakt website"""
+        if (options.titlesuffix):
+            title = re.sub(r'^(a|an|the) (.+)', r'\2, \1', title, flags=re.IGNORECASE)
+        return title
+        
 def main():
         """
         Main program loop
@@ -366,6 +373,10 @@ def main():
         parser.add_argument('-V', '--verbose',
                       help='print additional verbose information, default %(default)s',
                       default=True, action='store_true', dest='verbose')
+        parser.add_argument('--title-suffix',
+                      help='Place "The", "An" and "A" at the end of the title, default %(default)s',
+                      default=False, action='store_true', dest='titlesuffix')
+
         options = parser.parse_args()
 
         ## Display debug information
@@ -485,7 +496,7 @@ def main():
                 export_csv.append({ 'imdb' : data[options.type[:-1]]['ids']['imdb'],
                                     'trakt' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
-                                    'title' : data[options.type[:-1]]['title']})
+                                    'title' : process_title(options, data[options.type[:-1]]['title'])})
             # If movie or show export by format tmdb
             elif options.type[:-1] != "episode" and 'tmdb' in data[options.type[:-1]]['ids'] and \
                 options.format == "tmdb":
