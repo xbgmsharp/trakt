@@ -504,7 +504,7 @@ def main():
                 export_csv.append({ 'tmdb' : data[options.type[:-1]]['ids']['tmdb'],
                                     'trakt' : data[options.type[:-1]]['ids']['trakt'],
                                     options.time : data[options.time],
-                                    'title' : data[options.type[:-1]]['title']})
+                                    'title' : process_title(options, data[options.type[:-1]]['title'])})
             # If episode export by format tmdb
             elif 'tmdb' in data[options.type[:-1]]['ids'] and \
                 options.format == "tmdb":
