@@ -151,6 +151,9 @@ def write_csv(options, results):
         """Write list output into a CSV file format"""
         if options.verbose:
                 print("CSV output file: {0}".format(options.output))
+        if not results:
+                print("No results found, nothing to write.")
+                return
         # sort
         if options.sortorder == 'asc':
                 sorted_results = sorted(results, key = lambda kv:(kv[options.time]))
